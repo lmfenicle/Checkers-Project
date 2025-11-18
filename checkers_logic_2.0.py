@@ -35,6 +35,10 @@ class Piece:
         self.y = new_loc[1]
         self.rects = pygame.Rect(self.location[1] * 50 + 50, self.location[0] * 50 + 50, 50, 50)
 
+class Player:
+    def __init__(self, color):
+        self.color = color
+
 # fill the board with pieces in the right place
 # 1 for light and -1 for dark
 
@@ -155,8 +159,6 @@ def display_board_state(board):
         if element is not None:
             pygame.draw.circle(screen, element.color , element.rects.center, 15)
 
-####################################################### just messin around
-
 potential_move_pieces = []
 def load_potential_move_pieces(loc_list):
     # loads and updates the board with the current list of potential moves
@@ -174,11 +176,11 @@ def load_potential_move_pieces(loc_list):
 possible_moves_board = np.full((8,8),None, dtype = object)
 
 selected_piece = None
-##################################################### Just messin around
 
+turn = 1
+double_jump = None
 
 running = True
-
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -189,20 +191,28 @@ while running:
 
             mouse_pos = pygame.mouse.get_pos()
             clicked_piece = return_clicked_piece(mouse_pos, board)
-            ###########<
-            if clicked_piece is not None:
-                if clicked_piece.value != 99:
-                    selected_piece = clicked_piece
-                    print(selected_piece.location)
 
+            if (clicked_piece is not None):
+                if clicked_piece.value == turn:
+                    print(get_possible_moves(clicked_piece))
+                    load_potential_move_pieces(get_possible_moves(clicked_piece))
+                    if clicked_piece.value != 99:
+                        selected_piece = clicked_piece
+                        print(selected_piece.location)
 
-            if clicked_piece is not None:
-                print(get_possible_moves(clicked_piece))
-                load_potential_move_pieces(get_possible_moves(clicked_piece))
-            #############>
             possible_clicked_piece = return_clicked_piece(mouse_pos, possible_moves_board)
+
             if possible_clicked_piece is not None and selected_piece is not None:
                 move(selected_piece.location, possible_clicked_piece.location)
+                #TODO determine weather to update turns
+                if(double_jump == None):
+                    if(turn == 1):
+                        turn = -1
+                    else:
+                        turn = 1
+
+
+
                 # clear possible moves
                 possible_moves_board[:] = None
                 # deselect piece
