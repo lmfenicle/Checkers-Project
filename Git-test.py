@@ -13,7 +13,7 @@ pygame.font.init()
 def welcomeScreen():
     screen.fill(BLUE)
     font = pygame.font.SysFont('Arial', 90)
-    textToDispaly = "Welcome to Checkers!"
+    textToDispaly = "Lance is Stinky!"
     textColor = BLACK
     textSurface = font.render(textToDispaly, True, textColor)
 
@@ -25,7 +25,7 @@ def welcomeScreen():
     screen.blit(textSurface, textRect)
 
     font = pygame.font.SysFont('Arial', 50)
-    textToDispaly = "Press Enter to continue"
+    textToDispaly = "I broke it"
     textSurface = font.render(textToDispaly, True, textColor)
     textRect = textSurface.get_rect()
     textRect.center = (800 // 2, 600)

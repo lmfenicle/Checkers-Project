@@ -1,7 +1,6 @@
 import numpy as np
 import pygame
 import sys
-import time
 
 board = np.full((8,8),None, dtype = object)
 
@@ -35,7 +34,7 @@ class Piece:
         self.y = new_loc[1]
         self.rects = pygame.Rect(self.location[1] * 50 + 50, self.location[0] * 50 + 50, 50, 50)
 
-class Player:
+class Player: #TODO whatever this is
     def __init__(self, color):
         self.color = color
 
@@ -159,7 +158,6 @@ def display_board_state(board):
         if element is not None:
             pygame.draw.circle(screen, element.color , element.rects.center, 15)
 
-potential_move_pieces = []
 def load_potential_move_pieces(loc_list):
     # loads and updates the board with the current list of potential moves
     # TODO First remove all potential moves beforehand
@@ -172,17 +170,19 @@ def load_potential_move_pieces(loc_list):
         x, y = loc
         piece = Piece(loc,99)
         possible_moves_board[x][y]=piece
-
+# create list of possible moves
+potential_move_pieces = []
+#create possible moves board (to be displayed later)
 possible_moves_board = np.full((8,8),None, dtype = object)
 
-selected_piece = None
-
+selected_piece = None # blue potential piece
 turn = 1
 double_jump = None
 
 running = True
 while running:
-    for event in pygame.event.get():
+
+    for event in pygame.event.get(): # quit out of the game
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
@@ -190,39 +190,47 @@ while running:
         if event.type == pygame.MOUSEBUTTONDOWN:
 
             mouse_pos = pygame.mouse.get_pos()
-            clicked_piece = return_clicked_piece(mouse_pos, board)
+            clicked_piece = return_clicked_piece(mouse_pos, board) # returns the selected piece based off of the given location
 
-            if (clicked_piece is not None):
-                if clicked_piece.value == turn:
-                    print(get_possible_moves(clicked_piece))
-                    load_potential_move_pieces(get_possible_moves(clicked_piece))
-                    if clicked_piece.value != 99:
-                        selected_piece = clicked_piece
-                        print(selected_piece.location)
+            if double_jump is None: # if no double jump continue normally
+                if clicked_piece is not None:
 
+                    if clicked_piece.value == turn: #checks turn
+                        print(get_possible_moves(clicked_piece))
+                        load_potential_move_pieces(get_possible_moves(clicked_piece))
+
+                        if clicked_piece.value != 99: # if the selected piece is not a potential move piece
+                            selected_piece = clicked_piece # set the selected piece
+                            print(selected_piece.location)
+            else: # if double jump is active
+                # set the selected piece to only the jump piece
+                selected_piece = double_jump
+                load_potential_move_pieces(get_possible_moves(double_jump))
+                #TODO force the next move to be a jump - I have no clue how
+
+            # if the selected piece was not assigned to the selected piece, assign it to the potential piece
             possible_clicked_piece = return_clicked_piece(mouse_pos, possible_moves_board)
 
-            if possible_clicked_piece is not None and selected_piece is not None:
-                move(selected_piece.location, possible_clicked_piece.location)
-                #TODO determine weather to update turns
-                if(double_jump == None):
-                    if(turn == 1):
-                        turn = -1
-                    else:
-                        turn = 1
+            if possible_clicked_piece is not None and selected_piece is not None: # if both selected and potential are not None
 
+                if(possible_clicked_piece.location[0] - selected_piece.location[0]) % 2 == 0: # determine if the move was a jump
+                    double_jump = selected_piece # select the double jump
+                else:
+                    double_jump = None # clear the double jump
 
+                move(selected_piece.location, possible_clicked_piece.location) # do the move
+
+                if double_jump is None: # update the turn if not double jump
+                    turn *= -1
 
                 # clear possible moves
                 possible_moves_board[:] = None
                 # deselect piece
                 selected_piece = None
 
-    draw_board()
+    draw_board() # display checkerboard
 
-    display_board_state(board)
-    ################################################# Testing
-    display_board_state(possible_moves_board)
-    #################################################
+    display_board_state(board) # display checker pieces based on their location in the board array
+    display_board_state(possible_moves_board) # displays any possible pieces
 
     pygame.display.update()
