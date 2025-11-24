@@ -5,16 +5,19 @@ import sys
 board = np.full((8,8),None, dtype = object)
 
 # colors
-RED = (255, 0, 0); ORANGE = (255, 128, 0); YELLOW = (255, 255, 0); GREEN = (0, 255, 0); BLUE = (0, 0, 255); PURPLE = (255, 0, 255); WHITE = (255, 255, 255); BLACK = (0, 0, 0)
+RED = (255, 0, 0); ORANGE = (255, 128, 0); YELLOW = (255, 255, 0); GREEN = (0, 255, 0); BLUE = (0, 0, 255); PURPLE = (255, 0, 255); WHITE = (255, 255, 255); BLACK = (0, 0, 0); BROWN = (201, 155,100)
 BACKGROUND_COLOR = (60, 95, 74)
 
+boardSquare1List = [WHITE, BLACK, RED, BROWN, GREEN, YELLOW]
+boardSquare2List = [BLACK, WHITE, BROWN, RED, YELLOW, GREEN]
 topPieceColor = RED
 bottomPieceColor = BLACK
 topKingColor = YELLOW
 bottomKingColor= GREEN
 potenialMovePieceColor = BLUE
-boardSquare1Color = WHITE
-boardSquare2Color = BLACK
+boardSquare1Color = boardSquare1List[0]
+boardSquare2Color = boardSquare2List[0]
+
 
 
 class Piece:
@@ -262,8 +265,8 @@ while running:
         #Test to find out how color change might work
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RETURN:
-                boardSquare1Color = YELLOW
-                boardSquare2Color = RED
+                boardSquare1Color = boardSquare1List[(boardSquare1List.index(boardSquare1Color) + 1) % 6]
+                boardSquare2Color = boardSquare2List[(boardSquare2List.index(boardSquare2Color) + 1) % 6]
 
         if event.type == pygame.MOUSEBUTTONDOWN:
 
