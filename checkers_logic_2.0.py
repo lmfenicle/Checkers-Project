@@ -8,8 +8,14 @@ board = np.full((8,8),None, dtype = object)
 RED = (255, 0, 0); ORANGE = (255, 128, 0); YELLOW = (255, 255, 0); GREEN = (0, 255, 0); BLUE = (0, 0, 255); PURPLE = (255, 0, 255); WHITE = (255, 255, 255); BLACK = (0, 0, 0); BROWN = (201, 155,100)
 BACKGROUND_COLOR = (60, 95, 74)
 
+#TODO Needs to be reworked becuase these combinations are bad
 boardSquare1List = [WHITE, BLACK, RED, BROWN, GREEN, YELLOW]
 boardSquare2List = [BLACK, WHITE, BROWN, RED, YELLOW, GREEN]
+topPieceList = [RED, BLACK, BLUE, YELLOW]
+bottomPieceList = [BLACK, RED,YELLOW, GREEN]
+potenialColorList = [BLUE, ORANGE, BROWN, PURPLE]
+
+#defult colors
 topPieceColor = RED
 bottomPieceColor = BLACK
 topKingColor = YELLOW
@@ -232,8 +238,15 @@ def return_clicked_piece(pos, board):
 
 def display_board_state(board):
     for element in board.flat:
-        if element is not None:
-            pygame.draw.circle(screen, element.color , element.rects.center, 15)
+        global topPieceColor
+        global bottomPieceColor
+        global potenialMovePieceColor
+        if element is not None and element.value == 1:
+            pygame.draw.circle(screen, topPieceColor , element.rects.center, 15)
+        if element is not None and element.value == -1:
+            pygame.draw.circle(screen, bottomPieceColor , element.rects.center, 15)
+        if element is not None and element.value == 99:
+            pygame.draw.circle(screen, potenialMovePieceColor, element.rects.center, 15)
 
 def load_potential_move_pieces(loc_list):
     # loads and updates the board with the current list of potential moves
@@ -269,6 +282,9 @@ while running:
             if event.key == pygame.K_RETURN:
                 boardSquare1Color = boardSquare1List[(boardSquare1List.index(boardSquare1Color) + 1) % 6]
                 boardSquare2Color = boardSquare2List[(boardSquare2List.index(boardSquare2Color) + 1) % 6]
+                topPieceColor = topPieceList[(topPieceList.index(topPieceColor) + 1) % 4]
+                bottomPieceColor = bottomPieceList[(bottomPieceList.index(bottomPieceColor) + 1) % 4]
+                potenialMovePieceColor = potenialColorList[(potenialColorList.index(potenialMovePieceColor) + 1) % 4]
 
         if event.type == pygame.MOUSEBUTTONDOWN:
 
