@@ -18,8 +18,6 @@ potenialMovePieceColor = BLUE
 boardSquare1Color = boardSquare1List[0]
 boardSquare2Color = boardSquare2List[0]
 
-
-
 class Piece:
     def __init__(self, location, value):
         self.location = location
@@ -74,7 +72,7 @@ def instantiate_board():
                 if col % 2 == 0:
                     board[row][col] = Piece((row,col), -1)
 
-def get_possible_moves(piece):  # 1 is red, -1 is black, 5 is red king, -5 is black king
+def get_possible_moves(piece, jump_piece):  # 1 is red, -1 is black, 5 is red king, -5 is black king
     # input piece output: list of location tuples
     row = piece.x
     col = piece.y
@@ -173,18 +171,22 @@ def get_possible_moves(piece):  # 1 is red, -1 is black, 5 is red king, -5 is bl
                     if col != 6 and board[row + 2][col + 2] is None:
                         possible_moves.append((row + 2, col + 2))
 
-
+    # if the double jump piece is active, remove any potential moves that are not jumps
+    if jump_piece is not None:
+        temp_list = []
+        for loc in possible_moves:
+            if (loc[0] - col % 2 == 0) or (loc[1] - row % 2 == 0):
+                temp_list.append(loc)
+        possible_moves = temp_list
+    print(possible_moves)
     return possible_moves
 
 def move(location, destination):
-    #TODO refactor the move method for object handeling
 
     # warning! this method assumes all inputs are valid and in bounds
     # only moves pieces and removes takes
     diff_row = (destination[0] - location[0])
     diff_col = (destination[1] - location[1])
-
-    print("diff row/ col:",diff_row, diff_col)
 
     #if the move is a take
     if diff_row % 2 == 0:
@@ -205,7 +207,7 @@ def draw_board():
     #create board
     for i in range(0,4):
         for j in range(0,8):
-            if (j % 2 == 0):
+            if j % 2 == 0:
                 pygame.draw.rect(screen, boardSquare1Color, (50 + 100 * i, 50 + 50 * j, 50, 50), 0)
                 pygame.draw.rect(screen, boardSquare2Color, (100 + 100 * i, 50 + 50 * j, 50, 50), 0)
             else:
@@ -251,7 +253,7 @@ potential_move_pieces = []
 possible_moves_board = np.full((8,8),None, dtype = object)
 
 selected_piece = None # blue potential piece
-turn =1
+turn = 1 # default starts with red
 double_jump = None
 
 running = True
@@ -277,8 +279,8 @@ while running:
                 if clicked_piece is not None:
 
                     if clicked_piece.value == turn or clicked_piece.value == (turn *5): #checks turn
-                        print(get_possible_moves(clicked_piece))
-                        load_potential_move_pieces(get_possible_moves(clicked_piece))
+                        print(get_possible_moves(clicked_piece, double_jump))
+                        load_potential_move_pieces(get_possible_moves(clicked_piece,double_jump))
 
                         if clicked_piece.value != 99: # if the selected piece is not a potential move piece
                             selected_piece = clicked_piece # set the selected piece
@@ -286,15 +288,25 @@ while running:
             else: # if double jump is active
                 # set the selected piece to only the jump piece
                 selected_piece = double_jump
-                load_potential_move_pieces(get_possible_moves(double_jump))
-                #TODO force the next move to be a jump - I have no clue how
+                load_potential_move_pieces(get_possible_moves(double_jump, double_jump))
+
+                # provide a way to get out of the double jump
+                possible_moves = get_possible_moves(double_jump, double_jump)
+                if mouse_pos[0] > 450 or mouse_pos[1] > 450 or len(possible_moves) == 0: # if there are no possible jumps or the player clicks outside the board
+                    turn *= -1 # switch the turn
+
+                    # clear
+                    possible_moves_board[:] = None
+                    selected_piece = None
+                    possible_clicked_piece = None
+                    double_jump = None
 
             # if the selected piece was not assigned to the selected piece, assign it to the potential piece
             possible_clicked_piece = return_clicked_piece(mouse_pos, possible_moves_board)
 
             if possible_clicked_piece is not None and selected_piece is not None: # if both selected and potential are not None
 
-                if(possible_clicked_piece.location[0] - selected_piece.location[0]) % 2 == 0: # determine if the move was a jump
+                if (possible_clicked_piece.location[0] - selected_piece.location[0]) % 2 == 0: # determine if the move was a jump
                     double_jump = selected_piece # select the double jump
                 else:
                     double_jump = None # clear the double jump
