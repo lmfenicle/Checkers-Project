@@ -8,6 +8,13 @@ board = np.full((8,8),None, dtype = object)
 RED = (255, 0, 0); ORANGE = (255, 128, 0); YELLOW = (255, 255, 0); GREEN = (0, 255, 0); BLUE = (0, 0, 255); PURPLE = (255, 0, 255); WHITE = (255, 255, 255); BLACK = (0, 0, 0)
 BACKGROUND_COLOR = (60, 95, 74)
 
+topPieceColor = RED
+bottomPieceColor = BLACK
+potenialMovePieceColor = BLUE
+boardSquare1Color = WHITE
+boardSquare2Color = BLACK
+
+
 class Piece:
     def __init__(self, location, value):
         self.location = location
@@ -15,11 +22,15 @@ class Piece:
         self.y = location[1]
         self.value = value
         if value == -1:
-            self.color = BLACK
+            self.color = bottomPieceColor
         elif value == 1:
-            self.color = RED
+            self.color = topPieceColor
         elif self.value == 99:
-            self.color = BLUE
+            self.color = potenialMovePieceColor
+        elif self.value == 3:
+            self.color = bottomPieceColor
+        elif self.value == 4:
+            self.color = topPieceColor
 
         self.rects = pygame.Rect(self.location[1] * 50 + 50, self.location[0] * 50 + 50, 50, 50)
         self.is_king = False
@@ -46,17 +57,17 @@ def instantiate_board():
         for col in range(8):
             if row == 0 or row == 2:
                 if col % 2 == 0:
-                    board[row][col] = Piece((row,col),1)
+                    board[row][col] = Piece((row,col),4)
             elif row == 1:
                 if col % 2 == 1:
-                    board[row][col] = Piece((row,col),1)
+                    board[row][col] = Piece((row,col),4)
 
             elif row == 5 or row == 7:
                 if col % 2 == 1:
-                    board[row][col] = Piece((row,col), -1)
+                    board[row][col] = Piece((row,col), 3)
             elif row == 6:
                 if col % 2 == 0:
-                    board[row][col] = Piece((row,col), -1)
+                    board[row][col] = Piece((row,col), 3)
 
 def get_possible_moves(piece):  # TODO refactor for king pieces
     # input piece output: list of location tuples
@@ -86,16 +97,68 @@ def get_possible_moves(piece):  # TODO refactor for king pieces
             if col != 0:  # check up left
                 if board[row - 1][col - 1] is None:  # no piece in that loc
                     possible_moves.append((row - 1, col - 1))
-                elif board[row - 1][col - 1].value == 1:  # up left is a light piece
+                elif board[row - 1][col - 1].value == 1 or board[row - 1][col + 1].value == 4:  # up left is a light piece
                     if col != 1 and board[row - 2][col - 2] is None:
                         possible_moves.append((row - 2, col - 2))
 
             if col != 7:  # check up right
                 if board[row - 1][col + 1] is None:  # no piece in that loc
                     possible_moves.append((row - 1, col + 1))
-                elif board[row - 1][col + 1].value == 1:  # up right is a dark piece
+                elif board[row - 1][col + 1].value == 1 or board[row - 1][col + 1].value == 4:  # up right is a dark piece
                     if col != 6 and board[row - 2][col + 2] is None:
                         possible_moves.append((row - 2, col + 2))
+
+    if piece.value == 4: #red king
+        if row != 7:
+            if col != 0:  # check down left
+                if board[row + 1][col - 1] is None:  # no piece in that loc
+                    possible_moves.append((row + 1, col - 1))
+                elif board[row + 1][col - 1].value == -1 or board[row + 1][col - 1].value == 3:  # down left is a dark piece
+                    if col != 1 and board[row + 2][col - 2] is None:
+                        possible_moves.append((row + 2, col - 2))
+                elif board[row - 1][col - 1] is None:  # no piece in that loc
+                    possible_moves.append((row - 1, col - 1))
+                elif board[row - 1][col - 1].value == 1 or board[row - 1][col - 1].value == 3:  # up left is a light piece
+                    if col != 1 and board[row - 2][col - 2] is None:
+                        possible_moves.append((row - 2, col - 2))
+
+            if col != 7:  # check down right
+                if board[row + 1][col + 1] is None:  # no piece in that loc
+                    possible_moves.append((row + 1, col + 1))
+                elif board[row + 1][col + 1].value == -1 or board[row + 1][col + 1].value == 3:  # down left is a dark piece
+                    if col != 6 and board[row + 2][col + 2] is None:
+                        possible_moves.append((row + 2, col + 2))
+                elif board[row - 1][col + 1] is None:  # no piece in that loc
+                    possible_moves.append((row - 1, col + 1))
+                elif board[row - 1][col + 1].value == -1 or board[row - 1][col + 1].value == 3:  # up right is a dark piece
+                    if col != 6 and board[row - 2][col + 2] is None:
+                        possible_moves.append((row - 2, col + 2))
+
+    if piece.value == 3: # black king
+        if row != 0:
+            if col != 0:  # check up left
+                if board[row - 1][col - 1] is None:  # no piece in that loc
+                    possible_moves.append((row - 1, col - 1))
+                elif board[row - 1][col - 1].value == 1 or board[row - 1][col - 1].value == 4:  # up left is a light piece
+                    if col != 1 and board[row - 2][col - 2] is None:
+                        possible_moves.append((row - 2, col - 2))
+                elif board[row + 1][col - 1] is None:  # no piece in that loc
+                    possible_moves.append((row + 1, col - 1))
+                elif board[row + 1][col - 1].value == 1 or board[row + 1][col - 1].value == 4:  # down left is a dark piece
+                    if col != 1 and board[row + 2][col - 2] is None:
+                        possible_moves.append((row + 2, col - 2))
+
+            if col != 7:  # check up right
+                if board[row - 1][col + 1] is None:  # no piece in that loc
+                    possible_moves.append((row - 1, col + 1))
+                elif board[row - 1][col + 1].value == 1 or board[row - 1][col + 1].value == 4:  # up right is a dark piece
+                    if col != 6 and board[row - 2][col + 2] is None:
+                        possible_moves.append((row - 2, col + 2))
+                elif board[row + 1][col + 1] is None:  # no piece in that loc
+                    possible_moves.append((row + 1, col + 1))
+                elif board[row + 1][col + 1].value == 1 or board[row + 1][col + 1].value == 4:  # down left is a dark piece
+                    if col != 6 and board[row + 2][col + 2] is None:
+                        possible_moves.append((row + 2, col + 2))
 
     return possible_moves
 
@@ -131,11 +194,11 @@ def draw_board():
     for i in range(0,4):
         for j in range(0,8):
             if (j % 2 == 0):
-                pygame.draw.rect(screen, WHITE, (50 + 100 * i, 50 + 50 * j, 50, 50), 0)
-                pygame.draw.rect(screen, BLACK, (100 + 100 * i, 50 + 50 * j, 50, 50), 0)
+                pygame.draw.rect(screen, boardSquare1Color, (50 + 100 * i, 50 + 50 * j, 50, 50), 0)
+                pygame.draw.rect(screen, boardSquare2Color, (100 + 100 * i, 50 + 50 * j, 50, 50), 0)
             else:
-                pygame.draw.rect(screen, BLACK, (50 + 100 * i, 50 + 50 * j, 50, 50), 0)
-                pygame.draw.rect(screen, WHITE, (100 + 100 * i, 50 + 50 * j, 50, 50), 0)
+                pygame.draw.rect(screen, boardSquare2Color, (50 + 100 * i, 50 + 50 * j, 50, 50), 0)
+                pygame.draw.rect(screen, boardSquare1Color, (100 + 100 * i, 50 + 50 * j, 50, 50), 0)
 instantiate_board()
 
 ### Display piece location based on the board object
@@ -176,7 +239,7 @@ potential_move_pieces = []
 possible_moves_board = np.full((8,8),None, dtype = object)
 
 selected_piece = None # blue potential piece
-turn = 1
+turn = 4
 double_jump = None
 
 running = True
@@ -221,7 +284,10 @@ while running:
                 move(selected_piece.location, possible_clicked_piece.location) # do the move
 
                 if double_jump is None: # update the turn if not double jump
-                    turn *= -1
+                    if turn == 3:
+                        turn = 4
+                    else:
+                        turn = 3
 
                 # clear possible moves
                 possible_moves_board[:] = None
