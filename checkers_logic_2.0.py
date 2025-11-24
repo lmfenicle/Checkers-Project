@@ -109,6 +109,20 @@ def get_possible_moves(piece):  # TODO refactor for king pieces
                         possible_moves.append((row - 2, col + 2))
 
     if piece.value == 4: #red king
+        if row != 0:
+            if col != 0:  # check up left
+                if board[row - 1][col - 1] is None:  # no piece in that loc
+                    possible_moves.append((row - 1, col - 1))
+                elif board[row - 1][col - 1].value == -1 or board[row - 1][col - 1].value == 3:  # up left is a light piece
+                    if col != 1 and board[row - 2][col - 2] is None:
+                        possible_moves.append((row - 2, col - 2))
+
+            if col != 7:  # check up right
+                if board[row - 1][col + 1] is None:  # no piece in that loc
+                    possible_moves.append((row - 1, col + 1))
+                elif board[row - 1][col + 1].value == -1 or board[row - 1][col + 1].value == 3:  # up right is a dark piece
+                    if col != 6 and board[row - 2][col + 2] is None:
+                        possible_moves.append((row - 2, col + 2))
         if row != 7:
             if col != 0:  # check down left
                 if board[row + 1][col - 1] is None:  # no piece in that loc
@@ -116,11 +130,6 @@ def get_possible_moves(piece):  # TODO refactor for king pieces
                 elif board[row + 1][col - 1].value == -1 or board[row + 1][col - 1].value == 3:  # down left is a dark piece
                     if col != 1 and board[row + 2][col - 2] is None:
                         possible_moves.append((row + 2, col - 2))
-                elif board[row - 1][col - 1] is None:  # no piece in that loc
-                    possible_moves.append((row - 1, col - 1))
-                elif board[row - 1][col - 1].value == 1 or board[row - 1][col - 1].value == 3:  # up left is a light piece
-                    if col != 1 and board[row - 2][col - 2] is None:
-                        possible_moves.append((row - 2, col - 2))
 
             if col != 7:  # check down right
                 if board[row + 1][col + 1] is None:  # no piece in that loc
@@ -128,11 +137,6 @@ def get_possible_moves(piece):  # TODO refactor for king pieces
                 elif board[row + 1][col + 1].value == -1 or board[row + 1][col + 1].value == 3:  # down left is a dark piece
                     if col != 6 and board[row + 2][col + 2] is None:
                         possible_moves.append((row + 2, col + 2))
-                elif board[row - 1][col + 1] is None:  # no piece in that loc
-                    possible_moves.append((row - 1, col + 1))
-                elif board[row - 1][col + 1].value == -1 or board[row - 1][col + 1].value == 3:  # up right is a dark piece
-                    if col != 6 and board[row - 2][col + 2] is None:
-                        possible_moves.append((row - 2, col + 2))
 
     if piece.value == 3: # black king
         if row != 0:
@@ -142,11 +146,6 @@ def get_possible_moves(piece):  # TODO refactor for king pieces
                 elif board[row - 1][col - 1].value == 1 or board[row - 1][col - 1].value == 4:  # up left is a light piece
                     if col != 1 and board[row - 2][col - 2] is None:
                         possible_moves.append((row - 2, col - 2))
-                elif board[row + 1][col - 1] is None:  # no piece in that loc
-                    possible_moves.append((row + 1, col - 1))
-                elif board[row + 1][col - 1].value == 1 or board[row + 1][col - 1].value == 4:  # down left is a dark piece
-                    if col != 1 and board[row + 2][col - 2] is None:
-                        possible_moves.append((row + 2, col - 2))
 
             if col != 7:  # check up right
                 if board[row - 1][col + 1] is None:  # no piece in that loc
@@ -154,11 +153,21 @@ def get_possible_moves(piece):  # TODO refactor for king pieces
                 elif board[row - 1][col + 1].value == 1 or board[row - 1][col + 1].value == 4:  # up right is a dark piece
                     if col != 6 and board[row - 2][col + 2] is None:
                         possible_moves.append((row - 2, col + 2))
-                elif board[row + 1][col + 1] is None:  # no piece in that loc
+        if row != 7:
+            if col != 0:  # check down left
+                if board[row + 1][col - 1] is None:  # no piece in that loc
+                    possible_moves.append((row + 1, col - 1))
+                elif board[row + 1][col - 1].value == 1 or board[row + 1][col - 1].value == 4:  # down left is a dark piece
+                    if col != 1 and board[row + 2][col - 2] is None:
+                        possible_moves.append((row + 2, col - 2))
+
+            if col != 7:  # check down right
+                if board[row + 1][col + 1] is None:  # no piece in that loc
                     possible_moves.append((row + 1, col + 1))
                 elif board[row + 1][col + 1].value == 1 or board[row + 1][col + 1].value == 4:  # down left is a dark piece
                     if col != 6 and board[row + 2][col + 2] is None:
                         possible_moves.append((row + 2, col + 2))
+
 
     return possible_moves
 
