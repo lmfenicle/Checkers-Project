@@ -8,7 +8,7 @@ board = np.full((8,8),None, dtype = object)
 RED = (255, 0, 0); ORANGE = (255, 128, 0); YELLOW = (255, 255, 0); GREEN = (0, 255, 0); BLUE = (0, 0, 255); PURPLE = (255, 0, 255); WHITE = (255, 255, 255); BLACK = (0, 0, 0); BROWN = (201, 155,100)
 BACKGROUND_COLOR = (60, 95, 74)
 
-#TODO Needs to be reworked becuase these combinations are bad
+#TODO Needs to be reworked because these combinations are bad
 boardSquare1List = [WHITE, BLACK, RED, BROWN, GREEN, YELLOW]
 boardSquare2List = [BLACK, WHITE, BROWN, RED, YELLOW, GREEN]
 topPieceList = [RED, BLACK, BLUE, YELLOW]
@@ -37,7 +37,7 @@ class Piece:
         elif self.value == 99:
             self.color = potenialMovePieceColor
         elif self.value == 5:
-            self.color = bottomKingColor
+            self.color = ORANGE #bottomKingColor
         elif self.value == -5:
             self.color = topKingColor
 
@@ -53,6 +53,16 @@ class Piece:
         self.x = new_loc[0]
         self.y = new_loc[1]
         self.rects = pygame.Rect(self.location[1] * 50 + 50, self.location[0] * 50 + 50, 50, 50)
+
+    def king(self):
+        # TODO potentially change the image of the piece?
+        self.is_king = True
+        if self.value == 1:
+            self.value = 5
+            self.color = bottomKingColor
+        elif self.value == -1:
+            self.value = -5
+            self.color = topKingColor
 
 class Player: #TODO whatever this is
     def __init__(self, color):
@@ -188,6 +198,14 @@ def get_possible_moves(piece, jump_piece):  # 1 is red, -1 is black, 5 is red ki
     return possible_moves
 
 def move(location, destination):
+    # promote to king if necessary
+    if board[location[0]][location[1]].value == -1:
+        if destination[0] == 0:
+            board[location[0]][location[1]].king()
+
+    if board[location[0]][location[1]].value == 1:
+        if destination[0] == 7:
+            board[location[0]][location[1]].king()
 
     # warning! this method assumes all inputs are valid and in bounds
     # only moves pieces and removes takes
@@ -237,16 +255,23 @@ def return_clicked_piece(pos, board):
         return board[j][i] # WARNING - can return None
 
 def display_board_state(board):
-    for element in board.flat:
+    for element in board.flat: #TODO
         global topPieceColor
         global bottomPieceColor
         global potenialMovePieceColor
+        global topKingColor
+        global bottomKingColor
+
         if element is not None and element.value == 1:
             pygame.draw.circle(screen, topPieceColor , element.rects.center, 15)
         if element is not None and element.value == -1:
             pygame.draw.circle(screen, bottomPieceColor , element.rects.center, 15)
         if element is not None and element.value == 99:
             pygame.draw.circle(screen, potenialMovePieceColor, element.rects.center, 15)
+        if element is not None and element.value == 5:
+            pygame.draw.circle(screen, topKingColor , element.rects.center, 15)
+        if element is not None and element.value == -5:
+            pygame.draw.circle(screen, bottomKingColor , element.rects.center, 15)
 
 def load_potential_move_pieces(loc_list):
     # loads and updates the board with the current list of potential moves
@@ -269,6 +294,7 @@ selected_piece = None # blue potential piece
 turn = 1 # default starts with red
 double_jump = None
 
+#TODO win/ stalemate checker
 running = True
 while running:
 
