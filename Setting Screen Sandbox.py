@@ -1,19 +1,25 @@
 import numpy as np
 import pygame
 import sys
+import os
 
 board = np.full((8,8),None, dtype = object)
 
+
+WIDTH = 800
+HEIGHT = 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+
 # colors
-RED = (255, 0, 0); ORANGE = (255, 128, 0); YELLOW = (255, 255, 0); GREEN = (0, 255, 0); BLUE = (0, 0, 255); PURPLE = (255, 0, 255); WHITE = (255, 255, 255); BLACK = (0, 0, 0); BROWN = (201, 155,100); GRAY = (128,128,128)
+RED = (227, 66, 52); ORANGE = (255, 128, 0); YELLOW = (255, 255, 0); GREEN = (34, 139, 34); BLUE = (0, 0, 255); PURPLE = (255, 0, 255); WHITE = (255, 255, 255); BLACK = (0, 0, 0); BROWN = (150, 75, 0); GRAY = (128,128,128)
 BACKGROUND_COLOR = (60, 95, 74)
 
 #TODO Needs to be reworked because these combinations are bad
-boardSquare1List = [WHITE, BLACK, RED, BROWN, GREEN, YELLOW]
-boardSquare2List = [BLACK, WHITE, BROWN, RED, YELLOW, GREEN]
-topPieceList = [RED, BLACK, BLUE, YELLOW]
-bottomPieceList = [BLACK, RED,YELLOW, GREEN]
-potenialColorList = [BLUE, ORANGE, BROWN, PURPLE]
+boardSquare1List = [WHITE, BROWN, RED, RED]
+boardSquare2List = [BLACK, BLACK, BROWN, BLACK]
+topPieceList = [RED, RED, WHITE, WHITE]
+bottomPieceList = [BLACK, BLACK, BLACK, BROWN]
+colorCounter = 0
 
 #defult colors
 topPieceColor = RED
@@ -23,6 +29,16 @@ bottomKingColor= GREEN
 potenialMovePieceColor = BLUE
 boardSquare1Color = boardSquare1List[0]
 boardSquare2Color = boardSquare2List[0]
+
+#Assets list
+image_path = os.path.join('Assets', 'Black piece.png')
+your_image = pygame.image.load(image_path).convert_alpha()
+
+#Importnat mouse postiitons
+settingButton = pygame.Rect(725, 25, 50, 50)
+colorDown = pygame.Rect(450, 113, 75, 75)
+colorUp = pygame.Rect(650, 113, 75, 75)
+
 
 class Piece:
     def __init__(self, location, value):
@@ -243,6 +259,7 @@ def draw_board():
     pygame.draw.rect(screen, BLACK, (725, 25, 50, 50), 3)
 
 
+
     #Leaderboard button
     pygame.draw.rect(screen, BROWN, (650, 25, 50, 50), 0)
     pygame.draw.rect(screen, BLACK, (650, 25, 50, 50), 3)
@@ -252,9 +269,7 @@ instantiate_board()
 pygame.init()
 pygame.font.init()
 
-WIDTH = 800
-HEIGHT = 600
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
+
 
 def return_clicked_piece(pos, board):
     x, y = pos
@@ -306,7 +321,7 @@ double_jump = None
 #TODO win/ stalemate checker
 
 def drawSettingsScren():
-    pygame.draw.rect(screen, BROWN, (0, 0, 800, 600), 0)
+    pygame.draw.rect(screen, BACKGROUND_COLOR, (0, 0, 800, 600), 0)
 
     #color chnager section
     pygame.draw.rect(screen, BLUE, (50, 100, 700, 100), 3)
@@ -319,11 +334,20 @@ def drawSettingsScren():
     pygame.draw.rect(screen, BLACK, (450, 113, 75, 75), 3)
     pygame.draw.rect(screen, WHITE, (650, 113, 75, 75), 0)
     pygame.draw.rect(screen, BLACK, (650, 113, 75, 75), 3)
+    pygame.draw.rect(screen, boardSquare1Color, (550, 160, 25, 25), 0)
+    pygame.draw.rect(screen, boardSquare2Color, (550, 115, 25, 25), 0)
+    pygame.draw.circle(screen, topPieceColor, (605, 170), 15)
+    pygame.draw.circle(screen, bottomPieceColor, (605, 125), 15)
+    pygame.draw.line(screen, BLACK, (472, 148), (497, 123), 20)
+    pygame.draw.line(screen, BLACK, (472, 148), (497, 178), 20)
+
+    pygame.draw.line(screen, BLACK, (699, 148), (674, 123), 20)
+    pygame.draw.line(screen, BLACK, (699, 148), (674, 178), 20)
 
     #screen resolution
     pygame.draw.rect(screen, BLUE, (50, 250, 700, 100), 3)
     font = pygame.font.SysFont('Arial', 48)
-    textSurface = font.render("Screen Resolution", True, RED)
+    textSurface = font.render("Choose new feature", True, RED)
     textRect = textSurface.get_rect()
     textRect.center = (250, 300)
     screen.blit(textSurface, textRect)
@@ -331,6 +355,11 @@ def drawSettingsScren():
     pygame.draw.rect(screen, BLACK, (450, 263, 75, 75), 3)
     pygame.draw.rect(screen, WHITE, (650, 263, 75, 75), 0)
     pygame.draw.rect(screen, BLACK, (650, 263, 75, 75), 3)
+    pygame.draw.line(screen, BLACK, (472, 298), (497, 273), 20)
+    pygame.draw.line(screen, BLACK, (472, 298), (497, 323), 20)
+
+    pygame.draw.line(screen, BLACK, (699, 298), (674, 323), 20)
+    pygame.draw.line(screen, BLACK, (699, 298), (674, 273), 20)
 
     #Stats toggle
     pygame.draw.rect(screen, BLUE, (50, 400, 700, 100), 3)
@@ -345,6 +374,13 @@ def drawSettingsScren():
     # Second line (middle-top to top-right)
     pygame.draw.line(screen, GREEN, (610, 475), (710, 375), 25)
 
+    pygame.draw.rect(screen, BROWN, (725, 25, 50, 50), 0)
+    pygame.draw.rect(screen, BLACK, (725, 25, 50, 50), 3)
+    pygame.draw.line(screen, RED, (737, 35), (762, 60), 10)
+    pygame.draw.line(screen, RED, (737, 60), (762, 35), 10)
+
+displaySettings = False
+
 running = True
 while running:
 
@@ -354,17 +390,32 @@ while running:
             sys.exit()
 
         #Test to find out how color change might work
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_RETURN:
-                boardSquare1Color = boardSquare1List[(boardSquare1List.index(boardSquare1Color) + 1) % 6]
-                boardSquare2Color = boardSquare2List[(boardSquare2List.index(boardSquare2Color) + 1) % 6]
-                topPieceColor = topPieceList[(topPieceList.index(topPieceColor) + 1) % 4]
-                bottomPieceColor = bottomPieceList[(bottomPieceList.index(bottomPieceColor) + 1) % 4]
-                potenialMovePieceColor = potenialColorList[(potenialColorList.index(potenialMovePieceColor) + 1) % 4]
 
         if event.type == pygame.MOUSEBUTTONDOWN:
 
             mouse_pos = pygame.mouse.get_pos()
+
+            if settingButton.collidepoint(mouse_pos):
+                if displaySettings:
+                    displaySettings = False
+                else:
+                    displaySettings = True
+
+            if displaySettings and colorUp.collidepoint(mouse_pos):
+                colorCounter += 1
+                boardSquare1Color = boardSquare1List[colorCounter % 4]
+                boardSquare2Color = boardSquare2List[colorCounter % 4]
+                topPieceColor = topPieceList[colorCounter % 4]
+                bottomPieceColor = bottomPieceList[colorCounter % 4]
+
+            if displaySettings and colorDown.collidepoint(mouse_pos):
+                colorCounter -= 1
+                boardSquare1Color = boardSquare1List[colorCounter % 4]
+                boardSquare2Color = boardSquare2List[colorCounter % 4]
+                topPieceColor = topPieceList[colorCounter % 4]
+                bottomPieceColor = bottomPieceList[colorCounter % 4]
+
+
             clicked_piece = return_clicked_piece(mouse_pos, board) # returns the selected piece based off of the given location
 
             if double_jump is None: # if no double jump continue normally
@@ -417,5 +468,8 @@ while running:
 
     display_board_state(board) # display checker pieces based on their location in the board array
     display_board_state(possible_moves_board) # displays any possible pieces
-    #drawSettingsScren()
+
+    if displaySettings:
+        drawSettingsScren()
+
     pygame.display.update()
