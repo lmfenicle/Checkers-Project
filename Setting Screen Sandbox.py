@@ -5,7 +5,7 @@ import sys
 board = np.full((8,8),None, dtype = object)
 
 # colors
-RED = (255, 0, 0); ORANGE = (255, 128, 0); YELLOW = (255, 255, 0); GREEN = (0, 255, 0); BLUE = (0, 0, 255); PURPLE = (255, 0, 255); WHITE = (255, 255, 255); BLACK = (0, 0, 0); BROWN = (201, 155,100)
+RED = (255, 0, 0); ORANGE = (255, 128, 0); YELLOW = (255, 255, 0); GREEN = (0, 255, 0); BLUE = (0, 0, 255); PURPLE = (255, 0, 255); WHITE = (255, 255, 255); BLACK = (0, 0, 0); BROWN = (201, 155,100); GRAY = (128,128,128)
 BACKGROUND_COLOR = (60, 95, 74)
 
 #TODO Needs to be reworked because these combinations are bad
@@ -237,6 +237,15 @@ def draw_board():
             else:
                 pygame.draw.rect(screen, boardSquare2Color, (50 + 100 * i, 50 + 50 * j, 50, 50), 0)
                 pygame.draw.rect(screen, boardSquare1Color, (100 + 100 * i, 50 + 50 * j, 50, 50), 0)
+
+    #Settings button
+    pygame.draw.rect(screen, BROWN, (725, 25, 50, 50), 0)
+    pygame.draw.rect(screen, BLACK, (725, 25, 50, 50), 3)
+
+
+    #Leaderboard button
+    pygame.draw.rect(screen, BROWN, (650, 25, 50, 50), 0)
+    pygame.draw.rect(screen, BLACK, (650, 25, 50, 50), 3)
 instantiate_board()
 
 ### Display piece location based on the board object
@@ -408,5 +417,5 @@ while running:
 
     display_board_state(board) # display checker pieces based on their location in the board array
     display_board_state(possible_moves_board) # displays any possible pieces
-    drawSettingsScren()
+    #drawSettingsScren()
     pygame.display.update()
