@@ -101,14 +101,14 @@ def get_possible_moves(piece, jump_piece):  # 1 is red, -1 is black, 5 is red ki
                 if board[row + 1][col - 1] is None:  # no piece in that loc
                     possible_moves.append((row + 1, col - 1))
                 elif board[row + 1][col - 1].value == -1 or board[row + 1][col - 1].value == -5:  # down left is a dark piece
-                    if col != 1 and board[row + 2][col - 2] is None:
+                    if col > 1 and row < 6 and board[row + 2][col - 2] is None:
                         possible_moves.append((row + 2, col - 2))
 
             if col != 7:  # check down right
                 if board[row + 1][col + 1] is None:  # no piece in that loc
                     possible_moves.append((row + 1, col + 1))
                 elif board[row + 1][col + 1].value == -1 or board[row + 1][col + 1].value == -5:  # down left is a dark piece
-                    if col != 6 and board[row + 2][col + 2] is None:
+                    if row != 6 and col < 6 and board[row + 2][col + 2] is None:
                         possible_moves.append((row + 2, col + 2))
     # dark pieces move up
     if piece.value == -1:
@@ -191,10 +191,9 @@ def get_possible_moves(piece, jump_piece):  # 1 is red, -1 is black, 5 is red ki
     if jump_piece is not None:
         temp_list = []
         for loc in possible_moves:
-            if (loc[0] - col % 2 == 0) or (loc[1] - row % 2 == 0):
+            if (loc[1] - col) % 2 == 0 or (loc[0] - row) % 2 == 0:
                 temp_list.append(loc)
         possible_moves = temp_list
-    print(possible_moves)
     return possible_moves
 
 def move(location, destination):
@@ -285,6 +284,27 @@ def load_potential_move_pieces(loc_list):
         x, y = loc
         piece = Piece(loc,99)
         possible_moves_board[x][y]=piece
+
+def check_win(board): #TODO currently working on this
+    red_moves = 0
+    black_moves = 0
+    for element in board.flat:
+        if element is not None:
+            if get_possible_moves(element, None):
+                if element.value == 1 or element.value == 5:
+                    red_moves += 1
+                elif element.value == -1 or element.value == -5:
+                    black_moves += 1
+        if red_moves >= 1 and black_moves >= 1:
+            break
+    else: # if the board iterates through without both colors having possible moves
+        if black_moves == 0 and red_moves > 0:
+            print("RED WINS")
+        elif red_moves == 0 and black_moves > 0:
+            print("BLACK WINS")
+        pygame.quit()
+        sys.exit()
+
 # create list of possible moves
 potential_move_pieces = []
 #create possible moves board (to be displayed later)
@@ -294,7 +314,6 @@ selected_piece = None # blue potential piece
 turn = 1 # default starts with red
 double_jump = None
 
-#TODO win/ stalemate checker
 running = True
 while running:
 
@@ -320,7 +339,7 @@ while running:
             if double_jump is None: # if no double jump continue normally
                 if clicked_piece is not None:
 
-                    if clicked_piece.value == turn or clicked_piece.value == (turn *5): #checks turn
+                    if clicked_piece.value == turn or clicked_piece.value == (turn * 5): #checks turn
                         print(get_possible_moves(clicked_piece, double_jump))
                         load_potential_move_pieces(get_possible_moves(clicked_piece,double_jump))
 
@@ -350,6 +369,7 @@ while running:
 
                 if (possible_clicked_piece.location[0] - selected_piece.location[0]) % 2 == 0: # determine if the move was a jump
                     double_jump = selected_piece # select the double jump
+                    print("DOUBLE JUMP!!!!!!!")
                 else:
                     double_jump = None # clear the double jump
 
@@ -369,3 +389,4 @@ while running:
     display_board_state(possible_moves_board) # displays any possible pieces
 
     pygame.display.update()
+    check_win(board)
