@@ -4,6 +4,8 @@ import sys
 import os
 
 board = np.full((8,8),None, dtype = object)
+player1Win = False
+player2Win = False
 
 # colors
 RED = (227, 66, 52); ORANGE = (255, 128, 0); YELLOW = (255, 255, 0); GREEN = (34, 139, 34); BLUE = (0, 0, 255); PURPLE = (255, 0, 255); WHITE = (255, 255, 255); BLACK = (0, 0, 0); BROWN = (150, 75, 0); GRAY = (128,128,128)
@@ -33,6 +35,8 @@ boardSquare2Color = boardSquare2List[0]
 settingButton = pygame.Rect(725, 25, 50, 50)
 colorDown = pygame.Rect(450, 113, 75, 75)
 colorUp = pygame.Rect(650, 113, 75, 75)
+rematch = pygame.Rect(100, 400, 250, 100)
+quitButton = pygame.Rect(450, 400, 250, 100)
 
 class Piece:
     def __init__(self, location, value):
@@ -248,11 +252,11 @@ def draw_board():
                 pygame.draw.rect(screen, boardSquare1Color, (100 + 100 * i, 50 + 50 * j, 50, 50), 0)
 
     # Settings button
-    pygame.draw.rect(screen, BROWN, (725, 25, 50, 50), 0)
+    pygame.draw.rect(screen, GRAY, (725, 25, 50, 50), 0)
     pygame.draw.rect(screen, BLACK, (725, 25, 50, 50), 3)
 
     # Leaderboard button
-    pygame.draw.rect(screen, BROWN, (650, 25, 50, 50), 0)
+    pygame.draw.rect(screen, GRAY, (650, 25, 50, 50), 0)
     pygame.draw.rect(screen, BLACK, (650, 25, 50, 50), 3)
 instantiate_board()
 
@@ -306,6 +310,8 @@ def load_potential_move_pieces(loc_list):
 def check_win(board): #TODO currently working on this
     red_moves = 0
     black_moves = 0
+    global player1Win
+    global player2Win
     for element in board.flat:
         if element is not None:
             if get_possible_moves(element, None):
@@ -318,18 +324,18 @@ def check_win(board): #TODO currently working on this
     else: # if the board iterates through without both colors having possible moves
         if black_moves == 0 and red_moves > 0:
             print("RED WINS")
+            player1Win = True
         elif red_moves == 0 and black_moves > 0:
             print("BLACK WINS")
-        pygame.quit()
-        sys.exit()
+            player2Win = True
 
 def drawSettingsScren():
     pygame.draw.rect(screen, BACKGROUND_COLOR, (0, 0, 800, 600), 0)
 
     #color chnager section
-    pygame.draw.rect(screen, BLUE, (50, 100, 700, 100), 3)
+    pygame.draw.rect(screen, BLACK, (50, 100, 700, 100), 5)
     font = pygame.font.SysFont('Arial', 48)
-    textSurface = font.render("Choose Color Pallet", True, RED)
+    textSurface = font.render("Choose Color Pallet", True, BLACK)
     textRect = textSurface.get_rect()
     textRect.center = (250, 150)
     screen.blit(textSurface, textRect)
@@ -348,9 +354,9 @@ def drawSettingsScren():
     pygame.draw.line(screen, BLACK, (699, 148), (674, 178), 20)
 
     #screen resolution
-    pygame.draw.rect(screen, BLUE, (50, 250, 700, 100), 3)
+    pygame.draw.rect(screen, BLACK, (50, 250, 700, 100), 5)
     font = pygame.font.SysFont('Arial', 48)
-    textSurface = font.render("Choose new feature", True, RED)
+    textSurface = font.render("Forfeit add the features", True, BLACK)
     textRect = textSurface.get_rect()
     textRect.center = (250, 300)
     screen.blit(textSurface, textRect)
@@ -365,9 +371,9 @@ def drawSettingsScren():
     pygame.draw.line(screen, BLACK, (699, 298), (674, 273), 20)
 
     #Stats toggle
-    pygame.draw.rect(screen, BLUE, (50, 400, 700, 100), 3)
+    pygame.draw.rect(screen, BLACK, (50, 400, 700, 100), 5)
     font = pygame.font.SysFont('Arial', 48)
-    textSurface = font.render("Toggle Session Stats", True, RED)
+    textSurface = font.render("Toggle Session Stats", True, BLACK)
     textRect = textSurface.get_rect()
     textRect.center = (250, 450)
     screen.blit(textSurface, textRect)
@@ -377,10 +383,73 @@ def drawSettingsScren():
     # Second line (middle-top to top-right)
     pygame.draw.line(screen, GREEN, (610, 475), (710, 375), 25)
 
-    pygame.draw.rect(screen, BROWN, (725, 25, 50, 50), 0)
+    pygame.draw.rect(screen, GRAY, (725, 25, 50, 50), 0)
     pygame.draw.rect(screen, BLACK, (725, 25, 50, 50), 3)
     pygame.draw.line(screen, RED, (737, 35), (762, 60), 10)
     pygame.draw.line(screen, RED, (737, 60), (762, 35), 10)
+
+
+def drawStartScreen():
+    pygame.draw.rect(screen, BACKGROUND_COLOR, (0, 0, 800, 600), 0)
+
+    #Top Caption
+    font = pygame.font.SysFont('Arial', 48*2)
+    textSurface = font.render("Welcome to Checkers", True, BLACK)
+    textRect = textSurface.get_rect()
+    textRect.center = (400, 100)
+    screen.blit(textSurface, textRect)
+
+    #Credits
+    font = pygame.font.SysFont('Arial', 48)
+    textSurface = font.render("A game by", True, BLACK)
+    textRect = textSurface.get_rect()
+    textRect.center = (400, 200)
+    screen.blit(textSurface, textRect)
+    textSurface = font.render("Lance Fenicle & Jack Meadows", True, BLACK)
+    textRect = textSurface.get_rect()
+    textRect.center = (400, 300)
+    screen.blit(textSurface, textRect)
+
+    #Continue
+    textSurface = font.render("Press Enter to Continue", True, BLACK)
+    textRect = textSurface.get_rect()
+    textRect.center = (400, 400)
+    screen.blit(textSurface, textRect)
+
+#def drawInputScreen():
+
+def drawEndScreen():
+    pygame.draw.rect(screen, BACKGROUND_COLOR, (0, 0, 800, 600), 0)
+    font = pygame.font.SysFont('Arial', 48 * 2)
+
+    if player1Win == True:
+        textSurface = font.render("Player 1 Wins!", True, BLACK)
+    else:
+        textSurface = font.render("Player 2 Wins!", True, BLACK)
+
+    textRect = textSurface.get_rect()
+    textRect.center = (400, 100)
+    screen.blit(textSurface, textRect)
+
+    #Rematch
+    pygame.draw.rect(screen, GRAY, (100, 400, 250, 100), 0)
+    pygame.draw.rect(screen, BLACK, (100, 400, 250, 100), 3)
+    font = pygame.font.SysFont('Arial', 48)
+    textSurface = font.render("Rematch", True, BLACK)
+    textRect = textSurface.get_rect()
+    textRect.center = (225, 450)
+    screen.blit(textSurface, textRect)
+
+    #Quit
+    pygame.draw.rect(screen, GRAY, (450, 400, 250, 100), 0)
+    pygame.draw.rect(screen, BLACK, (450, 400, 250, 100), 3)
+    font = pygame.font.SysFont('Arial', 48)
+    textSurface = font.render("End Game", True, BLACK)
+    textRect = textSurface.get_rect()
+    textRect.center = (575, 450)
+    screen.blit(textSurface, textRect)
+
+#def drawLeaderBoardScreen():
 
 # create list of possible moves
 potential_move_pieces = []
@@ -390,7 +459,14 @@ possible_moves_board = np.full((8,8),None, dtype = object)
 selected_piece = None # blue potential piece
 turn = 1 # default starts with red
 double_jump = None
+
+#Screen state boolean
 displaySettings = False
+displayInput = False
+displayEnd = False
+displayLeaderboard = False
+displayStart = True
+displayBoard = False
 
 running = True
 while running:
@@ -399,6 +475,11 @@ while running:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RETURN and displayStart == True:
+                displayStart = False
+                displayBoard = True
+
 
         if event.type == pygame.MOUSEBUTTONDOWN:
 
@@ -423,6 +504,19 @@ while running:
                 boardSquare2Color = boardSquare2List[colorCounter % 4]
                 topPieceColor = topPieceList[colorCounter % 4]
                 bottomPieceColor = bottomPieceList[colorCounter % 4]
+
+            if displayEnd and rematch.collidepoint(mouse_pos):
+                displayEnd = False
+                displayStart = True
+                player1Win = False
+                player2Win = False
+                clicked_piece = None
+                instantiate_board()
+
+
+            if displayEnd and quitButton.collidepoint(mouse_pos):
+                pygame.quit()
+                sys.exit()
 
             clicked_piece = return_clicked_piece(mouse_pos, board) # returns the selected piece based off of the given location
 
@@ -473,13 +567,21 @@ while running:
                 # deselect piece
                 selected_piece = None
 
-    draw_board() # display checkerboard
+    if displayBoard:
+        draw_board() # display checkerboard
 
-    display_board_state(board) # display checker pieces based on their location in the board array
-    display_board_state(possible_moves_board) # displays any possible pieces
+        display_board_state(board) # display checker pieces based on their location in the board array
+        display_board_state(possible_moves_board) # displays any possible pieces
+
+    if displayStart:
+        drawStartScreen()
 
     if displaySettings:
         drawSettingsScren()
+
+    if player1Win == True or player2Win == True:
+        displayEnd = True
+        drawEndScreen()
 
     pygame.display.update()
     check_win(board)
