@@ -463,8 +463,67 @@ def loadLeaderBoard():
 
         row += 1
 
+def updateLeaderBoard():
 
-#def updateLeaderBoard():
+    player1Unquie = True
+    player2Unquie = True
+
+    for element in leaderBoardList:
+        if player1.name == element.name:
+            player1Unquie = False
+            if player1Win:
+                element.wins += 1
+            else:
+                element.losses += 1
+            if element.losses == 0:
+                element.ratio = element.wins
+            else:
+                element.ratio = round((element.wins / element.losses), 3)
+
+    for element in leaderBoardList:
+        if player2.name == element.name:
+            player2Unquie = False
+            if player2Win:
+                element.wins += 1
+            else:
+                element.losses += 1
+
+            if element.losses == 0:
+                element.ratio = element.wins
+            else:
+                element.ratio = round((element.wins / element.losses), 3)
+
+    if player1Unquie:
+        if player1Win:
+            tempPlayer = LeadBoardPlayer(player1.name, 1, 0, 1)
+        else:
+            tempPlayer = LeadBoardPlayer(player1.name, 0, 1, 0)
+        leaderBoardList.append(tempPlayer)
+
+    if player2Unquie:
+        if player2Win:
+            tempPlayer = LeadBoardPlayer(player2.name, 1, 0, 1)
+        else:
+            tempPlayer = LeadBoardPlayer(player2.name, 0, 1, 0)
+        leaderBoardList.append(tempPlayer)
+
+    workbook = openpyxl.load_workbook(os.path.join('Assets', 'Leaderboard.xlsx'))
+    sheet = workbook.active
+    row = 1
+    col = 1
+    for element in leaderBoardList:
+        sheet.cell(row=row, column=1).value = element.name
+
+        sheet.cell(row=row, column=2).value = element.wins
+
+        sheet.cell(row=row, column=3).value = element.losses
+
+        sheet.cell(row=row, column=4).value = element.ratio
+
+        row += 1
+
+    # save workbook
+    workbook.save(os.path.join('Assets', 'Leaderboard.xlsx'))
 
 def drawSettingsScren():
     pygame.draw.rect(screen, BACKGROUND_COLOR, (0, 0, 800, 600), 0)
@@ -603,10 +662,10 @@ def drawEndScreen():
     pygame.draw.rect(screen, BACKGROUND_COLOR, (0, 0, 800, 600), 0)
     font = pygame.font.SysFont('Arial', 48 * 2)
 
-    if player1Win == True:
-        textSurface = font.render("Player 1 Wins!", True, BLACK)
-    else:
-        textSurface = font.render("Player 2 Wins!", True, BLACK)
+
+    text = winner + " Wins!"
+    textSurface = font.render(text, True, BLACK)
+
 
     textRect = textSurface.get_rect()
     textRect.center = (400, 100)
@@ -717,6 +776,17 @@ def drawLeaderBoardScreen():
     pygame.draw.line(screen, BLACK, (34, 112), (49, 137), 10)
     pygame.draw.line(screen, BLACK, (49, 137), (64, 112), 10)
 
+    if leaderBoardSort == "Losses":
+        font = pygame.font.SysFont('Arial', 40)
+    else:
+        font = pygame.font.SysFont('Arial', 48)
+
+    text = leaderBoardSort
+    textSurface = font.render(text, True, BLACK)
+    textRect = textSurface.get_rect()
+    textRect.center = (50, 200)
+    screen.blit(textSurface, textRect)
+
 
 # create list of possible moves
 potential_move_pieces = []
@@ -737,6 +807,8 @@ displayBoard = False
 toggleStats = False
 doubleCheckSurrender1 = False
 doubleCheckSurrender2 = False
+update = False
+winner = ''
 loadLeaderBoard()
 
 running = True
@@ -752,7 +824,7 @@ while running:
             if playerEntering == 0:
                 if event.key == pygame.K_BACKSPACE:
                     userText = userText[:-1]  # Remove last character
-                elif event.key == pygame.K_RETURN:
+                elif event.key == pygame.K_RETURN and userText != '':
                     # Do something with the entered text (e.g., process it)
                     player1 = Player(userText)
                     playerEntering = 1
@@ -764,7 +836,7 @@ while running:
             elif playerEntering == 1:
                 if event.key == pygame.K_BACKSPACE:
                     userText = userText[:-1]  # Remove last character
-                elif event.key == pygame.K_RETURN:
+                elif event.key == pygame.K_RETURN and userText != '':
                     # Do something with the entered text (e.g., process it)
                     player2 = Player(userText)
                     displayInput = False
@@ -848,6 +920,7 @@ while running:
                 player1Win = False
                 player2Win = False
                 clicked_piece = None
+                playerEntering = 0
                 instantiate_board()
 
 
@@ -935,8 +1008,20 @@ while running:
         drawLeaderBoardScreen()
 
     if player1Win == True or player2Win == True:
+        if player1Win:
+            winner = player1.name
+        else:
+            winner = player2.name
         displayEnd = True
+        updateLeaderBoard()
+        player1Win = False
+        player2Win = False
+        doubleCheckSurrender1 = False
+        doubleCheckSurrender2 = False
+
+    if displayEnd:
         drawEndScreen()
+
 
     pygame.display.update()
     check_win(board)
