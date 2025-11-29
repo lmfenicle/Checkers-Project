@@ -631,7 +631,8 @@ while running:
                     playerEntering = 1
                     userText = ''
                 else:
-                    userText += event.unicode  # Add the pressed character
+                    if len(userText) < 10:
+                        userText += event.unicode  # Add the pressed character
 
             elif playerEntering == 1:
                 if event.key == pygame.K_BACKSPACE:
@@ -644,7 +645,8 @@ while running:
                     playerEntering = 1
                     userText = ''
                 else:
-                    userText += event.unicode  # Add the pressed character
+                    if len(userText) < 10:
+                        userText += event.unicode  # Add the pressed character
 
             # Start screen logic
         if event.type == pygame.KEYDOWN and displayStart:
