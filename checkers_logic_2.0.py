@@ -6,12 +6,13 @@ import os
 board = np.full((8,8),None, dtype = object)
 player1Win = False
 player2Win = False
+playerEntering = 0
+userText = ''
 
 # colors
 RED = (227, 66, 52); ORANGE = (255, 128, 0); YELLOW = (255, 255, 0); GREEN = (34, 139, 34); BLUE = (0, 0, 255); PURPLE = (255, 0, 255); WHITE = (255, 255, 255); BLACK = (0, 0, 0); BROWN = (150, 75, 0); GRAY = (128,128,128)
 BACKGROUND_COLOR = (60, 95, 74)
 
-#TODO Needs to be reworked because these combinations are bad
 boardSquare1List = [WHITE, BROWN, RED, RED]
 boardSquare2List = [BLACK, BLACK, BROWN, BLACK]
 topPieceList = [RED, RED, WHITE, WHITE]
@@ -37,6 +38,7 @@ colorDown = pygame.Rect(450, 113, 75, 75)
 colorUp = pygame.Rect(650, 113, 75, 75)
 rematch = pygame.Rect(100, 400, 250, 100)
 quitButton = pygame.Rect(450, 400, 250, 100)
+toggleStatsButton = pygame.Rect(575, 413, 75, 75)
 
 class Piece:
     def __init__(self, location, value):
@@ -79,8 +81,12 @@ class Piece:
             self.color = topKingColor
 
 class Player: #TODO whatever this is
-    def __init__(self, color):
-        self.color = color
+    def __init__(self, name):
+        self.name = name
+        self.moves = 0
+        self.captures = 0
+        self.kings = 0
+
 
 # fill the board with pieces in the right place
 # 1 for light and -1 for dark
@@ -215,10 +221,12 @@ def move(location, destination):
     if board[location[0]][location[1]].value == -1:
         if destination[0] == 0:
             board[location[0]][location[1]].king()
+            player2.kings += 1
 
     if board[location[0]][location[1]].value == 1:
         if destination[0] == 7:
             board[location[0]][location[1]].king()
+            player1.kings += 1
 
     # warning! this method assumes all inputs are valid and in bounds
     # only moves pieces and removes takes
@@ -258,6 +266,80 @@ def draw_board():
     # Leaderboard button
     pygame.draw.rect(screen, GRAY, (650, 25, 50, 50), 0)
     pygame.draw.rect(screen, BLACK, (650, 25, 50, 50), 3)
+
+    #Names
+    font = pygame.font.SysFont('Arial', 48, bold=True)
+    textSurface = font.render(player1.name, True, BLACK)
+    textRect = textSurface.get_rect()
+    textRect.center = (650, 100)
+    screen.blit(textSurface, textRect)
+
+    textSurface = font.render(player2.name, True, BLACK)
+    textRect = textSurface.get_rect()
+    textRect.center = (650, 550)
+    screen.blit(textSurface, textRect)
+
+    font = pygame.font.SysFont('Arial', 35)
+    #Checkers left
+    player1PiecesLeft = 11 - player2.captures
+    text = "Pieces Left = " + str(player1PiecesLeft)
+
+    textSurface = font.render(text , True, BLACK)
+    textRect = textSurface.get_rect()
+    textRect.center = (650, 150)
+    screen.blit(textSurface, textRect)
+
+    player1PiecesLeft = 11 - player1.captures
+    text = "Pieces Left = " + str(player1PiecesLeft)
+
+    textSurface = font.render(text, True, BLACK)
+    textRect = textSurface.get_rect()
+    textRect.center = (650, 500)
+    screen.blit(textSurface, textRect)
+
+    if toggleStats:
+
+        #captures
+        text = "Captures: "  + str(player1.captures)
+        textSurface = font.render(text, True, BLACK)
+        textRect = textSurface.get_rect()
+        textRect.center = (650, 200)
+        screen.blit(textSurface, textRect)
+
+        text = "Captures: "  + str(player2.captures)
+        textSurface = font.render(text, True, BLACK)
+        textRect = textSurface.get_rect()
+        textRect.center = (650, 450)
+        screen.blit(textSurface, textRect)
+
+        #moves
+        text = "Moves: " + str(player1.moves)
+        textSurface = font.render(text, True, BLACK)
+        textRect = textSurface.get_rect()
+        textRect.center = (650, 250)
+        screen.blit(textSurface, textRect)
+
+        text = "Moves: " + str(player2.moves)
+        textSurface = font.render(text, True, BLACK)
+        textRect = textSurface.get_rect()
+        textRect.center = (650, 400)
+        screen.blit(textSurface, textRect)
+
+        #promotions
+        text = "Promotions: " + str(player1.kings)
+        textSurface = font.render(text, True, BLACK)
+        textRect = textSurface.get_rect()
+        textRect.center = (650, 300)
+        screen.blit(textSurface, textRect)
+
+        text = "Promotions: " + str(player2.kings)
+        textSurface = font.render(text, True, BLACK)
+        textRect = textSurface.get_rect()
+        textRect.center = (650, 350)
+        screen.blit(textSurface, textRect)
+
+        pygame.draw.line(screen, BLACK, (525, 325), (775, 325), 5)
+
 instantiate_board()
 
 ### Display piece location based on the board object
@@ -276,7 +358,7 @@ def return_clicked_piece(pos, board):
         return board[j][i] # WARNING - can return None
 
 def display_board_state(board):
-    for element in board.flat: #TODO
+    for element in board.flat:
         global topPieceColor
         global bottomPieceColor
         global potenialMovePieceColor
@@ -296,7 +378,7 @@ def display_board_state(board):
 
 def load_potential_move_pieces(loc_list):
     # loads and updates the board with the current list of potential moves
-    # TODO First remove all potential moves beforehand
+
     for i in range(8):
         for j in range(8):
             if possible_moves_board[i][j] is not None:
@@ -379,15 +461,19 @@ def drawSettingsScren():
     screen.blit(textSurface, textRect)
     pygame.draw.rect(screen, WHITE, (575, 413, 75, 75), 0)
     pygame.draw.rect(screen, BLACK, (575, 413, 75, 75), 5)
-    pygame.draw.line(screen, GREEN, (560, 425), (610, 475), 25)
-    # Second line (middle-top to top-right)
-    pygame.draw.line(screen, GREEN, (610, 475), (710, 375), 25)
 
     pygame.draw.rect(screen, GRAY, (725, 25, 50, 50), 0)
     pygame.draw.rect(screen, BLACK, (725, 25, 50, 50), 3)
     pygame.draw.line(screen, RED, (737, 35), (762, 60), 10)
     pygame.draw.line(screen, RED, (737, 60), (762, 35), 10)
 
+    if toggleStats:
+        drawCheck()
+
+def drawCheck():
+    pygame.draw.line(screen, GREEN, (560, 425), (610, 475), 25)
+    # Second line (middle-top to top-right)
+    pygame.draw.line(screen, GREEN, (610, 475), (710, 375), 25)
 
 def drawStartScreen():
     pygame.draw.rect(screen, BACKGROUND_COLOR, (0, 0, 800, 600), 0)
@@ -416,7 +502,19 @@ def drawStartScreen():
     textRect.center = (400, 400)
     screen.blit(textSurface, textRect)
 
-#def drawInputScreen():
+def drawInputScreen():
+    global userText
+    pygame.draw.rect(screen, BACKGROUND_COLOR, (0, 0, 800, 600), 0)
+    font = pygame.font.SysFont('Arial', 48)
+    textSurface = font.render("Please Enter Name:", True, BLACK)
+    textRect = textSurface.get_rect()
+    textRect.center = (400, 200)
+    screen.blit(textSurface, textRect)
+
+    textSurface = font.render(userText, True, BLACK)
+    textRect = textSurface.get_rect()
+    textRect.center = (400, 400)
+    screen.blit(textSurface, textRect)
 
 def drawEndScreen():
     pygame.draw.rect(screen, BACKGROUND_COLOR, (0, 0, 800, 600), 0)
@@ -467,6 +565,7 @@ displayEnd = False
 displayLeaderboard = False
 displayStart = True
 displayBoard = False
+toggleStats = True
 
 running = True
 while running:
@@ -475,22 +574,51 @@ while running:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-        if event.type == pygame.KEYDOWN:
+        if event.type == pygame.KEYDOWN and displayInput:
+
+            #Input screen logic
+            if playerEntering == 0:
+                if event.key == pygame.K_BACKSPACE:
+                    userText = userText[:-1]  # Remove last character
+                elif event.key == pygame.K_RETURN:
+                    # Do something with the entered text (e.g., process it)
+                    player1 = Player(userText)
+                    playerEntering = 1
+                    userText = ''
+                else:
+                    userText += event.unicode  # Add the pressed character
+
+            elif playerEntering == 1:
+                if event.key == pygame.K_BACKSPACE:
+                    userText = userText[:-1]  # Remove last character
+                elif event.key == pygame.K_RETURN:
+                    # Do something with the entered text (e.g., process it)
+                    player2 = Player(userText)
+                    displayInput = False
+                    displayBoard = True
+                    playerEntering = 1
+                else:
+                    userText += event.unicode  # Add the pressed character
+
+            # Start screen logic
+        if event.type == pygame.KEYDOWN and displayStart:
             if event.key == pygame.K_RETURN and displayStart == True:
                 displayStart = False
-                displayBoard = True
+                displayInput = True
 
 
         if event.type == pygame.MOUSEBUTTONDOWN:
 
             mouse_pos = pygame.mouse.get_pos()
 
+            #Settings screen buttons
             if settingButton.collidepoint(mouse_pos):
                 if displaySettings:
                     displaySettings = False
                 else:
                     displaySettings = True
 
+            #Color changer logic
             if displaySettings and colorUp.collidepoint(mouse_pos):
                 colorCounter += 1
                 boardSquare1Color = boardSquare1List[colorCounter % 4]
@@ -505,6 +633,13 @@ while running:
                 topPieceColor = topPieceList[colorCounter % 4]
                 bottomPieceColor = bottomPieceList[colorCounter % 4]
 
+            if displaySettings and toggleStatsButton.collidepoint(mouse_pos):
+                if toggleStats == True:
+                    toggleStats = False
+                else:
+                    toggleStats = True
+
+            #End screen logic
             if displayEnd and rematch.collidepoint(mouse_pos):
                 displayEnd = False
                 displayStart = True
@@ -554,12 +689,23 @@ while running:
                 if (possible_clicked_piece.location[0] - selected_piece.location[0]) % 2 == 0: # determine if the move was a jump
                     double_jump = selected_piece # select the double jump
                     print("DOUBLE JUMP!!!!!!!")
+
+                    if turn == 1:
+                        player1.captures += 1
+                    else:
+                        player2.captures += 1
                 else:
                     double_jump = None # clear the double jump
 
                 move(selected_piece.location, possible_clicked_piece.location) # do the move
 
                 if double_jump is None: # update the turn if not double jump
+
+                    if turn == 1:
+                        player1.moves += 1
+                    else:
+                        player2.moves += 1
+
                     turn *= -1
 
                 # clear possible moves
@@ -575,6 +721,9 @@ while running:
 
     if displayStart:
         drawStartScreen()
+
+    if displayInput:
+        drawInputScreen()
 
     if displaySettings:
         drawSettingsScren()
