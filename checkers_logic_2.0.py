@@ -2,12 +2,15 @@ import numpy as np
 import pygame
 import sys
 import os
+import openpyxl
 
 board = np.full((8,8),None, dtype = object)
 player1Win = False
 player2Win = False
 playerEntering = 0
 userText = ''
+
+leaderBoardList = []
 
 # colors
 RED = (227, 66, 52); ORANGE = (255, 128, 0); YELLOW = (255, 255, 0); GREEN = (34, 139, 34); BLUE = (0, 0, 255); PURPLE = (255, 0, 255); WHITE = (255, 255, 255); BLACK = (0, 0, 0); BROWN = (150, 75, 0); GRAY = (128,128,128)
@@ -90,6 +93,13 @@ class Player:
         self.captures = 0
         self.kings = 0
 
+#Used for the leaderboard array
+class LeadBoardPlayer:
+    def __init__(self, name, wins, losses, ratio):
+        self.name = name
+        self.wins = wins
+        self.losses = losses
+        self.ratio = ratio
 
 # fill the board with pieces in the right place
 # 1 for light and -1 for dark
@@ -426,6 +436,28 @@ def check_win(board):
             print("BLACK WINS")
             player2Win = True
 
+def loadLeaderBoard():
+    workbook = openpyxl.load_workbook(os.path.join('Assets','Leaderboard.xlsx'))
+    sheet = workbook.active
+    row = 1
+    col = 1
+    cell = sheet.cell(row=row, column=col)
+    while cell.value is not None:
+        name = sheet[row][col].value
+        col += 1
+        wins = sheet[row][col].value
+        col += 1
+        losses = sheet[row][col].value
+        col += 1
+        ratio = sheet[row][col].value
+        tempLeaderBoard =  LeadBoardPlayer(name, wins, losses, ratio)
+        leaderBoardList.append(tempLeaderBoard)
+        col = 1
+        row += 1
+
+
+#def updateLeaderBoard():
+
 def drawSettingsScren():
     pygame.draw.rect(screen, BACKGROUND_COLOR, (0, 0, 800, 600), 0)
 
@@ -611,6 +643,8 @@ displayBoard = False
 toggleStats = False
 doubleCheckSurrender1 = False
 doubleCheckSurrender2 = False
+loadLeaderBoard()
+print(leaderBoardList)
 
 running = True
 while running:
