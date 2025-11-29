@@ -1,3 +1,4 @@
+import operator
 import numpy as np
 import pygame
 import sys
@@ -11,6 +12,9 @@ playerEntering = 0
 userText = ''
 
 leaderBoardList = []
+leaderBoardSortList = ["Wins", "Losses", "Ratio"]
+sortCounter = 0
+leaderBoardSort = leaderBoardSortList[sortCounter]
 
 # colors
 RED = (227, 66, 52); ORANGE = (255, 128, 0); YELLOW = (255, 255, 0); GREEN = (34, 139, 34); BLUE = (0, 0, 255); PURPLE = (255, 0, 255); WHITE = (255, 255, 255); BLACK = (0, 0, 0); BROWN = (150, 75, 0); GRAY = (128,128,128)
@@ -44,6 +48,9 @@ quitButton = pygame.Rect(450, 400, 250, 100)
 toggleStatsButton = pygame.Rect(575, 413, 75, 75)
 surrender1 = pygame.Rect(300, 263, 150, 75)
 surrender2 = pygame.Rect(550, 263, 150, 75)
+leaderBoardButton = pygame.Rect(650, 25, 50, 50)
+leaderBoardExitButton = pygame.Rect(25, 25, 50, 50)
+sortButton = pygame.Rect(25, 100, 50, 50)
 
 class Piece:
     def __init__(self, location, value):
@@ -442,17 +449,18 @@ def loadLeaderBoard():
     row = 1
     col = 1
     cell = sheet.cell(row=row, column=col)
-    while cell.value is not None:
-        name = sheet[row][col].value
-        col += 1
-        wins = sheet[row][col].value
-        col += 1
-        losses = sheet[row][col].value
-        col += 1
-        ratio = sheet[row][col].value
-        tempLeaderBoard =  LeadBoardPlayer(name, wins, losses, ratio)
+    while sheet.cell(row=row, column=1).value is not None:
+        name = sheet.cell(row=row, column=1).value
+
+        wins = sheet.cell(row=row, column=2).value
+
+        losses = sheet.cell(row=row, column=3).value
+
+        ratio = sheet.cell(row=row, column=4).value
+
+        tempLeaderBoard = LeadBoardPlayer(name, wins, losses, ratio)
         leaderBoardList.append(tempLeaderBoard)
-        col = 1
+
         row += 1
 
 
@@ -622,7 +630,93 @@ def drawEndScreen():
     textRect.center = (575, 450)
     screen.blit(textSurface, textRect)
 
-#def drawLeaderBoardScreen():
+def drawLeaderBoardScreen():
+    pygame.draw.rect(screen, BACKGROUND_COLOR, (0, 0, 800, 600), 0)
+
+    global leaderBoardSort
+    global leaderBoardList
+    match leaderBoardSort:
+        case "Wins":
+            leaderBoardList = sorted(leaderBoardList, key=operator.attrgetter('wins', 'name'))
+            leaderBoardList.reverse()
+        case "Losses":
+            leaderBoardList = sorted(leaderBoardList, key=operator.attrgetter('losses', 'name'))
+            leaderBoardList.reverse()
+        case "Ratio":
+            leaderBoardList = sorted(leaderBoardList, key=operator.attrgetter('ratio', 'name'))
+            leaderBoardList.reverse()
+
+    font = pygame.font.SysFont('Arial', 48)
+    i = 0
+
+    #heading text
+    textSurface = font.render('Name', True, BLACK)
+    textRect = textSurface.get_rect()
+    textRect.center = (200, 20)
+    screen.blit(textSurface, textRect)
+
+    #win
+    textSurface = font.render('Wins', True, BLACK)
+    textRect = textSurface.get_rect()
+    textRect.center = (400, 20)
+    screen.blit(textSurface, textRect)
+
+    #lose
+    textSurface = font.render('Losses', True, BLACK)
+    textRect = textSurface.get_rect()
+    textRect.center = (550, 20)
+    screen.blit(textSurface, textRect)
+
+    #ratio
+    textSurface = font.render('Ratio', True, BLACK)
+    textRect = textSurface.get_rect()
+    textRect.center = (700, 20)
+    screen.blit(textSurface, textRect)
+
+    while (len(leaderBoardList) > i) and i < 10:
+
+        #name
+        text = leaderBoardList[i].name
+        textSurface = font.render(text, True, BLACK)
+        textRect = textSurface.get_rect()
+        textRect.center = (200, 75 + 55 * i)
+        screen.blit(textSurface, textRect)
+
+        #win
+        text = str(leaderBoardList[i].wins)
+        textSurface = font.render(text, True, BLACK)
+        textRect = textSurface.get_rect()
+        textRect.center = (400, 75 + 55* i)
+        screen.blit(textSurface, textRect)
+
+        #lose
+        text = str(leaderBoardList[i].losses)
+        textSurface = font.render(text, True, BLACK)
+        textRect = textSurface.get_rect()
+        textRect.center = (550, 75 + 55 * i)
+        screen.blit(textSurface, textRect)
+
+        #ratio
+        text = str(leaderBoardList[i].ratio)
+        textSurface = font.render(text, True, BLACK)
+        textRect = textSurface.get_rect()
+        textRect.center = (700, 75 + 55 * i)
+        screen.blit(textSurface, textRect)
+
+        i += 1
+    for i in range(0,10):
+        pygame.draw.line(screen, BLACK, (125, 50+ 55 * i), (750, 50+ 55 * i) ,5)
+
+    pygame.draw.rect(screen, GRAY, (25, 25, 50, 50), 0)
+    pygame.draw.rect(screen, BLACK, (25, 25, 50, 50), 3)
+    pygame.draw.line(screen, RED, (37, 35), (62, 60), 10)
+    pygame.draw.line(screen, RED, (37, 60), (62, 35), 10)
+
+    pygame.draw.rect(screen, WHITE, (25, 100, 50, 50), 0)
+    pygame.draw.rect(screen, BLACK, (25, 100, 50, 50), 3)
+    pygame.draw.line(screen, BLACK, (34, 112), (49, 137), 10)
+    pygame.draw.line(screen, BLACK, (49, 137), (64, 112), 10)
+
 
 # create list of possible moves
 potential_move_pieces = []
@@ -644,7 +738,6 @@ toggleStats = False
 doubleCheckSurrender1 = False
 doubleCheckSurrender2 = False
 loadLeaderBoard()
-print(leaderBoardList)
 
 running = True
 while running:
@@ -699,6 +792,16 @@ while running:
                     displaySettings = False
                 else:
                     displaySettings = True
+
+            if leaderBoardButton.collidepoint(mouse_pos):
+                if displayBoard:
+                    displayLeaderboard = True
+            if displayLeaderboard and leaderBoardExitButton.collidepoint(mouse_pos):
+                displayLeaderboard = False
+
+            if displayLeaderboard and sortButton.collidepoint(mouse_pos):
+                sortCounter += 1
+                leaderBoardSort = leaderBoardSortList[sortCounter % 3]
 
             #Color changer logic
             if displaySettings and colorUp.collidepoint(mouse_pos):
@@ -827,6 +930,9 @@ while running:
 
     if displaySettings:
         drawSettingsScren()
+
+    if displayLeaderboard:
+        drawLeaderBoardScreen()
 
     if player1Win == True or player2Win == True:
         displayEnd = True
