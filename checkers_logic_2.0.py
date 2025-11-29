@@ -39,6 +39,8 @@ colorUp = pygame.Rect(650, 113, 75, 75)
 rematch = pygame.Rect(100, 400, 250, 100)
 quitButton = pygame.Rect(450, 400, 250, 100)
 toggleStatsButton = pygame.Rect(575, 413, 75, 75)
+surrender1 = pygame.Rect(300, 263, 150, 75)
+surrender2 = pygame.Rect(550, 263, 150, 75)
 
 class Piece:
     def __init__(self, location, value):
@@ -80,7 +82,8 @@ class Piece:
             self.value = -5
             self.color = topKingColor
 
-class Player: #TODO whatever this is
+#used for stats purposes rather than main gameplay
+class Player:
     def __init__(self, name):
         self.name = name
         self.moves = 0
@@ -281,7 +284,7 @@ def draw_board():
 
     font = pygame.font.SysFont('Arial', 35)
     #Checkers left
-    player1PiecesLeft = 11 - player2.captures
+    player1PiecesLeft = 12 - player2.captures
     text = "Pieces Left = " + str(player1PiecesLeft)
 
     textSurface = font.render(text , True, BLACK)
@@ -289,7 +292,7 @@ def draw_board():
     textRect.center = (650, 150)
     screen.blit(textSurface, textRect)
 
-    player1PiecesLeft = 11 - player1.captures
+    player1PiecesLeft = 12 - player1.captures
     text = "Pieces Left = " + str(player1PiecesLeft)
 
     textSurface = font.render(text, True, BLACK)
@@ -340,6 +343,18 @@ def draw_board():
 
         pygame.draw.line(screen, BLACK, (525, 325), (775, 325), 5)
 
+    font = pygame.font.SysFont('Arial', 60, bold=True)
+    global turn
+    if turn == 1:
+        text = str(player1.name) + "'s turn"
+    else:
+        text = str(player2.name) + "'s turn"
+
+    textSurface = font.render(text, True, BLACK)
+    textRect = textSurface.get_rect()
+    textRect.center = (250, 500)
+    screen.blit(textSurface, textRect)
+
 instantiate_board()
 
 ### Display piece location based on the board object
@@ -389,7 +404,7 @@ def load_potential_move_pieces(loc_list):
         piece = Piece(loc,99)
         possible_moves_board[x][y]=piece
 
-def check_win(board): #TODO currently working on this
+def check_win(board):
     red_moves = 0
     black_moves = 0
     global player1Win
@@ -435,22 +450,47 @@ def drawSettingsScren():
     pygame.draw.line(screen, BLACK, (699, 148), (674, 123), 20)
     pygame.draw.line(screen, BLACK, (699, 148), (674, 178), 20)
 
-    #screen resolution
+    #surrender button
     pygame.draw.rect(screen, BLACK, (50, 250, 700, 100), 5)
     font = pygame.font.SysFont('Arial', 48)
-    textSurface = font.render("Forfeit add the features", True, BLACK)
+    textSurface = font.render("Surrender", True, BLACK)
     textRect = textSurface.get_rect()
-    textRect.center = (250, 300)
+    textRect.center = (175, 300)
     screen.blit(textSurface, textRect)
-    pygame.draw.rect(screen, WHITE, (450, 263, 75, 75), 0)
-    pygame.draw.rect(screen, BLACK, (450, 263, 75, 75), 3)
-    pygame.draw.rect(screen, WHITE, (650, 263, 75, 75), 0)
-    pygame.draw.rect(screen, BLACK, (650, 263, 75, 75), 3)
-    pygame.draw.line(screen, BLACK, (472, 298), (497, 273), 20)
-    pygame.draw.line(screen, BLACK, (472, 298), (497, 323), 20)
+    pygame.draw.rect(screen, WHITE, (300, 263, 150, 75), 0)
+    pygame.draw.rect(screen, BLACK, (300, 263, 150, 75), 3)
 
-    pygame.draw.line(screen, BLACK, (699, 298), (674, 323), 20)
-    pygame.draw.line(screen, BLACK, (699, 298), (674, 273), 20)
+
+    pygame.draw.rect(screen, WHITE, (550, 263, 150, 75), 0)
+    pygame.draw.rect(screen, BLACK, (550, 263, 150, 75), 3)
+
+    if doubleCheckSurrender1 == False:
+        if len(player1.name) > 6:
+            font = pygame.font.SysFont('Arial', 30)
+        else:
+            font = pygame.font.SysFont('Arial', 48)
+        text = player1.name
+    else:
+        font = pygame.font.SysFont('Arial', 30)
+        text = "Surrender?"
+    textSurface = font.render(text, True, BLACK)
+    textRect = textSurface.get_rect()
+    textRect.center = (372, 300)
+    screen.blit(textSurface, textRect)
+
+    if doubleCheckSurrender2 == False:
+        if len(player2.name) > 6:
+            font = pygame.font.SysFont('Arial', 30)
+        else:
+            font = pygame.font.SysFont('Arial', 48)
+        text = player2.name
+    else:
+        font = pygame.font.SysFont('Arial', 30)
+        text = "Surrender?"
+    textSurface = font.render(text, True, BLACK)
+    textRect = textSurface.get_rect()
+    textRect.center = (622, 300)
+    screen.blit(textSurface, textRect)
 
     #Stats toggle
     pygame.draw.rect(screen, BLACK, (50, 400, 700, 100), 5)
@@ -503,8 +543,11 @@ def drawStartScreen():
     screen.blit(textSurface, textRect)
 
 def drawInputScreen():
-    global userText
     pygame.draw.rect(screen, BACKGROUND_COLOR, (0, 0, 800, 600), 0)
+    pygame.draw.rect(screen, GRAY, (275, 375, 250, 50), 0)
+    pygame.draw.rect(screen, BLACK, (275, 375, 250, 50), 3)
+
+    global userText
     font = pygame.font.SysFont('Arial', 48)
     textSurface = font.render("Please Enter Name:", True, BLACK)
     textRect = textSurface.get_rect()
@@ -565,7 +608,9 @@ displayEnd = False
 displayLeaderboard = False
 displayStart = True
 displayBoard = False
-toggleStats = True
+toggleStats = False
+doubleCheckSurrender1 = False
+doubleCheckSurrender2 = False
 
 running = True
 while running:
@@ -597,6 +642,7 @@ while running:
                     displayInput = False
                     displayBoard = True
                     playerEntering = 1
+                    userText = ''
                 else:
                     userText += event.unicode  # Add the pressed character
 
@@ -633,11 +679,28 @@ while running:
                 topPieceColor = topPieceList[colorCounter % 4]
                 bottomPieceColor = bottomPieceList[colorCounter % 4]
 
+            #Toggle stats logic
             if displaySettings and toggleStatsButton.collidepoint(mouse_pos):
                 if toggleStats == True:
                     toggleStats = False
                 else:
                     toggleStats = True
+
+            # Surrender logic
+            if displaySettings and surrender1.collidepoint(mouse_pos):
+                if doubleCheckSurrender1 == False:
+                    doubleCheckSurrender1 = True
+                else:
+                    displaySettings = False
+                    displayBoard = False
+                    player2Win = True
+            if displaySettings and surrender2.collidepoint(mouse_pos):
+                if doubleCheckSurrender2 == False:
+                    doubleCheckSurrender2 = True
+                else:
+                    displaySettings = False
+                    displayBoard = False
+                    player1Win = True
 
             #End screen logic
             if displayEnd and rematch.collidepoint(mouse_pos):
@@ -713,6 +776,7 @@ while running:
                 # deselect piece
                 selected_piece = None
 
+    #display states handled down here
     if displayBoard:
         draw_board() # display checkerboard
 
