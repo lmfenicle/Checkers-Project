@@ -1,1 +1,16 @@
+This is a list of all assets required to run the checkers’ main code file.
+Black Piece.png
+White Piece.png
+Red Piece.png
+Brown Piece.png
+Gray Piece.png
+Black King.png
+White King.png
+Red King.png
+Brown King.png
+Check Mark.png
+Leaderboard Symbol.png
+Settings Gear.png
+Leaderboard.xlsx
 
+If there are errors with the assets while running the code, please make sure all these files are in the assets folder with the names shown above.
