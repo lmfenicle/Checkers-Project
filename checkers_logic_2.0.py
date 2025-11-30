@@ -7,6 +7,12 @@ import openpyxl
 
 clock = pygame.time.Clock()
 clock.tick(60)
+pygame.init()
+pygame.font.init()
+
+WIDTH = 800
+HEIGHT = 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 board = np.full((8,8),None, dtype = object)
 player1Win = False
@@ -38,9 +44,40 @@ potenialMovePieceColor = BLUE
 boardSquare1Color = boardSquare1List[0]
 boardSquare2Color = boardSquare2List[0]
 
-#Assets list for latter addition
-#image_path = os.path.join('Assets', 'Black piece.png')
-#your_image = pygame.image.load(image_path).convert_alpha()
+#Assets list
+image_path = os.path.join('Assets', 'Black piece.png')
+blackPiece = pygame.image.load(image_path).convert_alpha()
+image_path = os.path.join('Assets', 'Brown piece.png')
+brownPiece = pygame.image.load(image_path).convert_alpha()
+image_path = os.path.join('Assets', 'White piece.png')
+whitePiece = pygame.image.load(image_path).convert_alpha()
+image_path = os.path.join('Assets', 'Red piece.png')
+redPiece = pygame.image.load(image_path).convert_alpha()
+image_path = os.path.join('Assets', 'Gray piece.png')
+grayPiece = pygame.image.load(image_path).convert_alpha()
+
+image_path = os.path.join('Assets', 'Black King.png')
+blackKing= pygame.image.load(image_path).convert_alpha()
+image_path = os.path.join('Assets', 'Brown King.png')
+brownKing= pygame.image.load(image_path).convert_alpha()
+image_path = os.path.join('Assets', 'Red King.png')
+redKing= pygame.image.load(image_path).convert_alpha()
+image_path = os.path.join('Assets', 'White King.png')
+whiteKing= pygame.image.load(image_path).convert_alpha()
+
+image_path = os.path.join('Assets', 'Leaderboard Symbol.png')
+leaderBoardSymbol= pygame.image.load(image_path).convert_alpha()
+image_path = os.path.join('Assets', 'Settings Gear.png')
+settingsGearSymbol= pygame.image.load(image_path).convert_alpha()
+image_path = os.path.join('Assets', 'Check Mark.png')
+checkSymbol= pygame.image.load(image_path).convert_alpha()
+
+
+lowerImageList = [blackPiece, blackPiece, blackPiece, brownPiece]
+upperImageList = [redPiece, redPiece, whitePiece, whitePiece]
+lowerKingImageList = [blackKing, blackKing, blackKing, brownKing]
+upperKingImageList = [redKing, redKing, whiteKing, whiteKing]
+
 
 #Importnat mouse postiitons
 settingButton = pygame.Rect(725, 25, 50, 50)
@@ -285,10 +322,18 @@ def drawBoard():
     # Settings button
     pygame.draw.rect(screen, GRAY, (725, 25, 50, 50), 0)
     pygame.draw.rect(screen, BLACK, (725, 25, 50, 50), 3)
+    settingsGearScaled = pygame.transform.scale(settingsGearSymbol, (40, 40))
+    settingsGearSymbolRect = settingsGearScaled.get_rect()
+    settingsGearSymbolRect.center = (750, 50)
+    screen.blit(settingsGearScaled, settingsGearSymbolRect)
 
     # Leaderboard button
     pygame.draw.rect(screen, GRAY, (650, 25, 50, 50), 0)
     pygame.draw.rect(screen, BLACK, (650, 25, 50, 50), 3)
+    leaderBoardScaled = pygame.transform.scale(leaderBoardSymbol, (50, 60))
+    leaderBoardSymbolRect = leaderBoardScaled.get_rect()
+    leaderBoardSymbolRect.center = (675, 40)
+    screen.blit(leaderBoardScaled, leaderBoardSymbolRect)
 
     #Names
     font = pygame.font.SysFont('Arial', 48, bold=True)
@@ -379,12 +424,6 @@ def drawBoard():
 instantiateBoard()
 
 ### Display piece location based on the board object
-pygame.init()
-pygame.font.init()
-
-WIDTH = 800
-HEIGHT = 600
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 def returnClickedPiece(pos, board):
     x, y = pos
@@ -403,14 +442,35 @@ def displayBoardState(board):
 
         if element is not None and element.value == 1:
             pygame.draw.circle(screen, topPieceColor , element.rects.center, 15)
+            upperScaled = pygame.transform.scale(upperImageList[colorCounter % 4], (50, 50))
+            upperRect = upperScaled.get_rect()
+            upperRect.center = (element.rects.center[0], element.rects.center[1])
+            screen.blit(upperScaled, upperRect)
+
         if element is not None and element.value == -1:
-            pygame.draw.circle(screen, bottomPieceColor , element.rects.center, 15)
+            lowerScaled = pygame.transform.scale(lowerImageList[colorCounter % 4], (50, 50))
+            lowerRect = lowerScaled.get_rect()
+            lowerRect.center = (element.rects.center[0], element.rects.center[1])
+            screen.blit(lowerScaled, lowerRect)
+
         if element is not None and element.value == 99:
-            pygame.draw.circle(screen, potenialMovePieceColor, element.rects.center, 15)
+            grayScaled = pygame.transform.scale(grayPiece, (35, 35))
+            grayRect = grayScaled.get_rect()
+            grayRect.center = (element.rects.center[0], element.rects.center[1])
+            screen.blit(grayScaled, grayRect)
+
         if element is not None and element.value == 5:
             pygame.draw.circle(screen, topKingColor , element.rects.center, 15)
+            upperKingScaled = pygame.transform.scale(upperKingImageList[colorCounter % 4], (50, 50))
+            upperKingRect = upperKingScaled.get_rect()
+            upperKingRect.center = (element.rects.center[0], element.rects.center[1])
+            screen.blit(upperKingScaled, upperKingRect)
+
         if element is not None and element.value == -5:
-            pygame.draw.circle(screen, bottomKingColor , element.rects.center, 15)
+            lowerKingScaled = pygame.transform.scale(lowerKingImageList[colorCounter % 4], (50, 50))
+            lowerKingRect = lowerKingScaled.get_rect()
+            lowerKingRect.center = (element.rects.center[0], element.rects.center[1])
+            screen.blit(lowerKingScaled , lowerKingRect)
 
 def loadPotentialMovePieces(loc_list):
     # loads and updates the board with the current list of potential moves
@@ -614,9 +674,10 @@ def drawSettingsScren():
         drawCheck()
 
 def drawCheck():
-    pygame.draw.line(screen, GREEN, (560, 425), (610, 475), 25)
-    # Second line (middle-top to top-right)
-    pygame.draw.line(screen, GREEN, (610, 475), (710, 375), 25)
+    checkScaled = pygame.transform.scale(checkSymbol, (100, 100))
+    checkSymbolRect = checkScaled.get_rect()
+    checkSymbolRect.center = (612, 450)
+    screen.blit(checkScaled, checkSymbolRect)
 
 def drawStartScreen():
     pygame.draw.rect(screen, BACKGROUND_COLOR, (0, 0, 800, 600), 0)
