@@ -123,7 +123,6 @@ class Piece:
         self.rects = pygame.Rect(self.location[1] * 50 + 50, self.location[0] * 50 + 50, 50, 50)
 
     def king(self):
-        # TODO potentially change the image of the piece?
         self.is_king = True
         if self.value == 1:
             self.value = 5
@@ -297,7 +296,6 @@ def move(location, destination):
     if diff_row % 2 == 0:
         remove_row = location[0] + (diff_row // 2)
         remove_col = location[1] + (diff_col // 2)
-        print(remove_row, remove_col)
         board[remove_row][remove_col] = None
 
     # reassigns the location attribute to the moved piece
@@ -501,10 +499,8 @@ def checkWin(board):
             break
     else: # if the board iterates through without both colors having possible moves
         if black_moves == 0 and red_moves > 0:
-            print("RED WINS")
             player1Win = True
         elif red_moves == 0 and black_moves > 0:
-            print("BLACK WINS")
             player2Win = True
 
 def loadLeaderBoard():
@@ -1000,12 +996,10 @@ while running:
                 if clicked_piece is not None:
 
                     if clicked_piece.value == turn or clicked_piece.value == (turn * 5): #checks turn
-                        print(getPossibleMoves(clicked_piece, double_jump))
                         loadPotentialMovePieces(getPossibleMoves(clicked_piece, double_jump))
 
                         if clicked_piece.value != 99: # if the selected piece is not a potential move piece
                             selected_piece = clicked_piece # set the selected piece
-                            print(selected_piece.location)
             else: # if double jump is active
                 # set the selected piece to only the jump piece
                 selected_piece = double_jump
@@ -1029,7 +1023,6 @@ while running:
 
                 if (possible_clicked_piece.location[0] - selected_piece.location[0]) % 2 == 0: # determine if the move was a jump
                     double_jump = selected_piece # select the double jump
-                    print("DOUBLE JUMP!!!!!!!")
 
                     if turn == 1:
                         player1.captures += 1
