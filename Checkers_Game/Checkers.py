@@ -5,6 +5,7 @@ import sys
 import os
 import openpyxl
 
+# Clock Object for frame limiting
 clock = pygame.time.Clock()
 clock.tick(60)
 pygame.init()
