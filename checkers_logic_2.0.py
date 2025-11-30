@@ -5,6 +5,9 @@ import sys
 import os
 import openpyxl
 
+clock = pygame.time.Clock()
+clock.tick(60)
+
 board = np.full((8,8),None, dtype = object)
 player1Win = False
 player2Win = False
@@ -111,7 +114,7 @@ class LeadBoardPlayer:
 # fill the board with pieces in the right place
 # 1 for light and -1 for dark
 
-def instantiate_board():
+def instantiateBoard():
     for row in range(8):
         for col in range(8):
             if row == 0 or row == 2:
@@ -128,7 +131,7 @@ def instantiate_board():
                 if col % 2 == 0:
                     board[row][col] = Piece((row,col), -1)
 
-def get_possible_moves(piece, jump_piece):  # 1 is red, -1 is black, 5 is red king, -5 is black king
+def getPossibleMoves(piece, jump_piece):  # 1 is red, -1 is black, 5 is red king, -5 is black king
     # input piece output: list of location tuples
     row = piece.x
     col = piece.y
@@ -267,7 +270,7 @@ def move(location, destination):
     # removes the original piece in the board
     board[location] = None
 
-def draw_board():
+def drawBoard():
     screen.fill(BACKGROUND_COLOR)
     #create board
     for i in range(0,4):
@@ -372,7 +375,8 @@ def draw_board():
     textRect.center = (250, 500)
     screen.blit(textSurface, textRect)
 
-instantiate_board()
+
+instantiateBoard()
 
 ### Display piece location based on the board object
 pygame.init()
@@ -382,14 +386,14 @@ WIDTH = 800
 HEIGHT = 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
-def return_clicked_piece(pos, board):
+def returnClickedPiece(pos, board):
     x, y = pos
     if (50 <= x <= 450) & (50 <= y <= 450): #clicked on the board
         i = (x - 50) // 50
         j = (y - 50) // 50
         return board[j][i] # WARNING - can return None
 
-def display_board_state(board):
+def displayBoardState(board):
     for element in board.flat:
         global topPieceColor
         global bottomPieceColor
@@ -408,7 +412,7 @@ def display_board_state(board):
         if element is not None and element.value == -5:
             pygame.draw.circle(screen, bottomKingColor , element.rects.center, 15)
 
-def load_potential_move_pieces(loc_list):
+def loadPotentialMovePieces(loc_list):
     # loads and updates the board with the current list of potential moves
 
     for i in range(8):
@@ -421,14 +425,14 @@ def load_potential_move_pieces(loc_list):
         piece = Piece(loc,99)
         possible_moves_board[x][y]=piece
 
-def check_win(board):
+def checkWin(board):
     red_moves = 0
     black_moves = 0
     global player1Win
     global player2Win
     for element in board.flat:
         if element is not None:
-            if get_possible_moves(element, None):
+            if getPossibleMoves(element, None):
                 if element.value == 1 or element.value == 5:
                     red_moves += 1
                 elif element.value == -1 or element.value == -5:
@@ -921,21 +925,22 @@ while running:
                 player2Win = False
                 clicked_piece = None
                 playerEntering = 0
-                instantiate_board()
+                instantiateBoard()
 
 
             if displayEnd and quitButton.collidepoint(mouse_pos):
                 pygame.quit()
                 sys.exit()
 
-            clicked_piece = return_clicked_piece(mouse_pos, board) # returns the selected piece based off of the given location
+            clicked_piece = returnClickedPiece(mouse_pos,
+                                               board)  # returns the selected piece based off of the given location
 
             if double_jump is None: # if no double jump continue normally
                 if clicked_piece is not None:
 
                     if clicked_piece.value == turn or clicked_piece.value == (turn * 5): #checks turn
-                        print(get_possible_moves(clicked_piece, double_jump))
-                        load_potential_move_pieces(get_possible_moves(clicked_piece,double_jump))
+                        print(getPossibleMoves(clicked_piece, double_jump))
+                        loadPotentialMovePieces(getPossibleMoves(clicked_piece, double_jump))
 
                         if clicked_piece.value != 99: # if the selected piece is not a potential move piece
                             selected_piece = clicked_piece # set the selected piece
@@ -943,10 +948,10 @@ while running:
             else: # if double jump is active
                 # set the selected piece to only the jump piece
                 selected_piece = double_jump
-                load_potential_move_pieces(get_possible_moves(double_jump, double_jump))
+                loadPotentialMovePieces(getPossibleMoves(double_jump, double_jump))
 
                 # provide a way to get out of the double jump
-                possible_moves = get_possible_moves(double_jump, double_jump)
+                possible_moves = getPossibleMoves(double_jump, double_jump)
                 if mouse_pos[0] > 450 or mouse_pos[1] > 450 or len(possible_moves) == 0: # if there are no possible jumps or the player clicks outside the board
                     turn *= -1 # switch the turn
 
@@ -957,7 +962,7 @@ while running:
                     double_jump = None
 
             # if the selected piece was not assigned to the selected piece, assign it to the potential piece
-            possible_clicked_piece = return_clicked_piece(mouse_pos, possible_moves_board)
+            possible_clicked_piece = returnClickedPiece(mouse_pos, possible_moves_board)
 
             if possible_clicked_piece is not None and selected_piece is not None: # if both selected and potential are not None
 
@@ -990,10 +995,10 @@ while running:
 
     #display states handled down here
     if displayBoard:
-        draw_board() # display checkerboard
+        drawBoard()  # display checkerboard
 
-        display_board_state(board) # display checker pieces based on their location in the board array
-        display_board_state(possible_moves_board) # displays any possible pieces
+        displayBoardState(board)  # display checker pieces based on their location in the board array
+        displayBoardState(possible_moves_board)  # displays any possible pieces
 
     if displayStart:
         drawStartScreen()
@@ -1022,6 +1027,5 @@ while running:
     if displayEnd:
         drawEndScreen()
 
-
     pygame.display.update()
-    check_win(board)
+    checkWin(board)
